@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Celebrity Age Blackjack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Bebas+Neue&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#D4AF37;--gold-light:#F5E27A;--gold-dark:#8B6914;
+  --deep-green:#0A2E1A;--felt:#0D3B22;--felt-light:#145228;
+  --red:#C0392B;--red-bright:#E74C3C;
+  --cream:#F8F0DC;--dark:#050F0A;--card-bg:#FFFDF5;
+  --glow:rgba(212,175,55,0.4);--blue:#2980B9;--blue-light:#5DADE2;
+  --green:#27AE60;--green-light:#5CDB95;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--dark);font-family:'Montserrat',sans-serif;min-height:100vh;overflow-x:hidden;color:var(--cream);}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,var(--felt) 0%,var(--deep-green) 60%,var(--dark) 100%);z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);z-index:0;}
+.container{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:0 16px;}
+
+/* HEADER */
+header{text-align:center;padding:20px 16px 8px;position:relative;}
+header::before{content:'♠ ♥ ♦ ♣';display:block;font-size:1rem;letter-spacing:12px;color:var(--gold);margin-bottom:6px;opacity:0.7;}
+.title-main{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,6vw,4rem);letter-spacing:6px;background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px var(--glow));}
+.title-sub{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(0.75rem,2vw,0.95rem);color:var(--gold);opacity:0.8;margin-top:2px;letter-spacing:3px;}
+.border-line{width:260px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:8px auto;}
+
+/* SCREENS */
+.screen{display:none;animation:fadeIn 0.4s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* MENU */
+.menu-cards{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;padding:16px 0 8px;}
+.mode-card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid var(--gold-dark);border-radius:12px;padding:26px 20px;text-align:center;cursor:pointer;width:190px;transition:all 0.3s;}
+.mode-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 40px var(--glow);}
+.mode-icon{font-size:2.2rem;margin-bottom:8px;display:block;}
+.mode-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--gold);margin-bottom:5px;}
+.mode-desc{font-size:0.73rem;opacity:0.65;line-height:1.5;}
+
+/* SETUP */
+.setup-box{max-width:460px;margin:0 auto;background:rgba(255,255,255,0.04);border:1px solid var(--gold-dark);border-radius:14px;padding:26px;}
+.setup-box h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--gold);text-align:center;margin-bottom:18px;}
+.input-row{margin-bottom:11px;}
+.input-row label{display:block;font-size:0.7rem;letter-spacing:2px;color:var(--gold);opacity:0.8;margin-bottom:3px;text-transform:uppercase;}
+.input-row input,.input-row select{width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--gold-dark);border-radius:6px;padding:8px 11px;color:var(--cream);font-family:'Montserrat',sans-serif;font-size:0.86rem;outline:none;transition:border-color 0.2s;}
+.input-row input:focus,.input-row select:focus{border-color:var(--gold);}
+.input-row select option{background:var(--dark);}
+
+/* BUTTONS */
+.btn{font-family:'Bebas Neue',sans-serif;letter-spacing:3px;font-size:1rem;padding:10px 24px;border-radius:6px;border:none;cursor:pointer;transition:all 0.25s;display:inline-block;}
+.btn-gold{background:linear-gradient(135deg,var(--gold-dark),var(--gold),var(--gold-light));color:var(--dark);box-shadow:0 4px 20px rgba(212,175,55,0.3);}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.5);}
+.btn-outline{background:transparent;border:1px solid var(--gold-dark);color:var(--gold);}
+.btn-outline:hover{border-color:var(--gold);background:rgba(212,175,55,0.08);}
+.btn-blue{background:linear-gradient(135deg,#1a4a7a,var(--blue),var(--blue-light));color:white;box-shadow:0 4px 20px rgba(41,128,185,0.3);}
+.btn-blue:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(93,173,226,0.5);}
+.btn-sm{font-size:0.8rem;padding:7px 14px;letter-spacing:2px;}
+.btn-block{width:100%;text-align:center;margin-top:8px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important;}
+
+/* PHASE BANNER */
+.phase-banner{text-align:center;padding:6px 0 4px;}
+.phase-pill{display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:4px;padding:4px 18px;border-radius:20px;border:1px solid;}
+.phase-pill.pozo{color:#5DADE2;border-color:#2980B9;background:rgba(41,128,185,0.15);}
+.phase-pill.partida{color:var(--gold);border-color:var(--gold-dark);background:rgba(212,175,55,0.1);}
+
+/* ROUND + SCOREBOARD */
+.game-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;flex-wrap:wrap;gap:8px;}
+.round-info{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--gold);}
+.scoreboard{display:flex;gap:7px;flex-wrap:wrap;}
+.score-badge{background:rgba(0,0,0,0.5);border:1px solid var(--gold-dark);border-radius:20px;padding:3px 11px;font-size:0.73rem;display:flex;align-items:center;gap:5px;}
+.score-badge.active-player{border-color:var(--gold);background:rgba(212,175,55,0.15);}
+.score-name{color:var(--gold);font-weight:600;}
+
+/* TURN */
+.turn-banner{text-align:center;margin:5px 0;}
+.turn-text{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:4px;color:var(--gold);padding:4px 16px;border-top:1px solid var(--gold-dark);border-bottom:1px solid var(--gold-dark);display:inline-block;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+
+/* ═══ CELEBRITY PHOTO CARD ═══ */
+.celeb-photo-card{
+  display:flex;align-items:center;gap:16px;
+  background:var(--card-bg);border-radius:14px;
+  padding:14px 18px;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6),0 0 0 3px var(--gold-dark);
+  max-width:500px;margin:0 auto;
+  animation:cardSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  color:#1a1a1a;
+}
+@keyframes cardSlide{from{opacity:0;transform:translateY(-18px) scale(0.93)}to{opacity:1;transform:none}}
+.celeb-photo-wrap{
+  width:90px;height:90px;min-width:90px;
+  border-radius:50%;overflow:hidden;
+  border:3px solid var(--gold-dark);
+  background:#ddd;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;
+  flex-shrink:0;
+}
+.celeb-photo-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;}
+.celeb-photo-info{flex:1;min-width:0;}
+.celeb-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;line-height:1.2;margin-bottom:2px;}
+.celeb-category{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:5px;}
+.celeb-hint{font-size:0.75rem;color:#555;font-style:italic;line-height:1.4;}
+.age-reveal-inline{margin-top:8px;padding:6px 12px;background:linear-gradient(135deg,var(--deep-green),var(--felt-light));border-radius:6px;display:none;text-align:center;}
+.age-reveal-inline.visible{display:block;animation:fadeIn 0.3s ease;}
+.age-number{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);letter-spacing:3px;display:block;}
+.age-label{font-size:0.6rem;letter-spacing:2px;color:rgba(212,175,55,0.7);text-transform:uppercase;}
+
+/* ═══ LIVE ESTIMATION INPUT ═══ */
+.live-est-zone{
+  max-width:500px;margin:10px auto;
+  background:rgba(0,0,0,0.4);border:1px solid rgba(41,128,185,0.4);
+  border-radius:10px;padding:12px 16px;
+}
+.live-est-label{font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--blue-light);margin-bottom:6px;display:block;}
+.live-est-input-row{display:flex;align-items:center;gap:10px;}
+.live-est-input{
+  background:rgba(0,0,0,0.5);border:1px solid var(--gold-dark);border-radius:6px;
+  padding:8px 12px;color:var(--cream);font-family:'Bebas Neue',sans-serif;
+  font-size:1.5rem;letter-spacing:3px;outline:none;width:90px;text-align:center;
+  transition:border-color 0.2s;
+}
+.live-est-input:focus{border-color:var(--gold);}
+.live-est-running{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:2px;color:var(--blue-light);}
+.live-est-confirm{padding:8px 16px;font-size:0.85rem;}
+
+/* HAND CARDS ROW */
+.cards-row{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;min-height:65px;align-items:center;}
+.mini-card{
+  background:var(--card-bg);border-radius:8px;padding:0;
+  box-shadow:0 4px 14px rgba(0,0,0,0.5),0 0 0 2px var(--gold-dark);
+  text-align:center;width:70px;overflow:hidden;
+  animation:cardSlide 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.mini-card.bust{box-shadow:0 4px 14px rgba(0,0,0,0.5),0 0 0 2px var(--red);}
+.mc-photo{width:70px;height:55px;object-fit:cover;object-position:top center;display:block;background:#ddd;}
+.mc-photo-placeholder{width:70px;height:55px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:#e8e4d9;}
+.mc-name{font-size:0.5rem;color:#444;font-weight:600;line-height:1.1;padding:2px 3px;}
+.mc-age{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--deep-green);letter-spacing:1px;display:block;padding-bottom:3px;}
+.mini-card.bust .mc-age{color:var(--red);}
+.mc-est{font-size:0.5rem;color:var(--blue);padding-bottom:2px;}
+
+/* STATUS BAR */
+.status-bar{display:flex;justify-content:center;align-items:center;gap:18px;margin:6px 0;flex-wrap:wrap;}
+.stat-block{text-align:center;}
+.stat-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;opacity:0.6;display:block;}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;display:block;}
+.total-safe{color:var(--green-light);}
+.total-warn{color:#F39C12;}
+.total-danger{color:var(--red-bright);}
+.total-bust{color:var(--red);text-decoration:line-through;}
+.pozo-val{color:var(--blue-light);}
+.stat-sep{font-size:1.2rem;opacity:0.3;}
+.progress-wrap{width:100%;max-width:380px;margin:4px auto;}
+.progress-bg{height:7px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.4s ease;background:linear-gradient(90deg,var(--green-light),var(--gold));}
+.progress-fill.warn{background:linear-gradient(90deg,var(--gold),#F39C12);}
+.progress-fill.danger{background:linear-gradient(90deg,#F39C12,var(--red-bright));}
+.progress-fill.bust{background:var(--red);}
+
+/* ACTIONS */
+.action-zone{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:8px 0;}
+
+/* AI */
+.ai-thinking{text-align:center;padding:10px;font-style:italic;opacity:0.7;font-size:0.8rem;display:none;}
+.ai-thinking.visible{display:block;animation:pulse 1s infinite;}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent);margin:8px 0;}
+
+/* LOG */
+.game-log{max-width:520px;margin:6px auto;max-height:90px;overflow-y:auto;font-size:0.7rem;opacity:0.55;line-height:1.8;padding:6px 8px;border-top:1px solid rgba(212,175,55,0.15);}
+.game-log p{margin-bottom:1px;}
+.log-gold{color:var(--gold);}
+.log-blue{color:var(--blue-light);}
+
+/* ═══ POZO PHASE ═══ */
+.pozo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:10px 0;}
+.pozo-celeb-card{
+  background:var(--card-bg);border-radius:12px;overflow:hidden;
+  box-shadow:0 6px 24px rgba(0,0,0,0.5),0 0 0 2px var(--gold-dark);
+  animation:cardSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);color:#1a1a1a;
+}
+.pcc-photo{width:100%;height:130px;object-fit:cover;object-position:top center;display:block;background:#ddd;}
+.pcc-photo-placeholder{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:#e8e4d9;}
+.pcc-body{padding:10px 12px;}
+.pcc-name{font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:700;line-height:1.2;margin-bottom:2px;}
+.pcc-cat{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:4px;}
+.pcc-hint{font-size:0.7rem;color:#666;font-style:italic;line-height:1.3;}
+
+.estimates-section{margin:12px 0;}
+.estimates-section h3{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--blue-light);margin-bottom:8px;text-align:center;}
+.player-estimate-row{background:rgba(0,0,0,0.35);border:1px solid rgba(41,128,185,0.3);border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+.per-name{font-size:0.75rem;font-weight:600;color:var(--blue-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;}
+.estimate-inputs{display:flex;gap:7px;flex-wrap:wrap;}
+.est-input-wrap{flex:1;min-width:72px;}
+.est-input-wrap label{font-size:0.58rem;color:#aaa;letter-spacing:1px;display:block;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.est-input-wrap input[type=number]{width:100%;background:rgba(0,0,0,0.5);border:1px solid var(--gold-dark);border-radius:5px;padding:6px 7px;color:var(--cream);font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;outline:none;text-align:center;transition:border-color 0.2s;}
+.est-input-wrap input[type=number]:focus{border-color:var(--gold);}
+.pozo-total-row{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:6px;}
+.pozo-total-label{font-size:0.68rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.pozo-total-val{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;min-width:44px;text-align:right;}
+
+/* ═══ RESULT SCREEN ═══ */
+.result-box{max-width:720px;margin:0 auto;background:rgba(0,0,0,0.5);border:1px solid var(--gold-dark);border-radius:16px;padding:24px;}
+.result-trophy{font-size:3rem;display:block;text-align:center;margin-bottom:8px;animation:bounce 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes bounce{from{transform:scale(0) rotate(-20deg)}to{transform:none}}
+.result-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:5px;color:var(--gold);text-align:center;margin-bottom:5px;}
+.result-summary{font-size:0.83rem;opacity:0.75;line-height:1.6;text-align:center;margin-bottom:14px;}
+.result-section-title{font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:4px;color:var(--blue-light);text-transform:uppercase;margin:14px 0 7px;border-bottom:1px solid rgba(41,128,185,0.3);padding-bottom:3px;}
+.result-section-title.gold{color:var(--gold);border-bottom-color:rgba(212,175,55,0.3);}
+
+.pozo-reveal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px;}
+.prg-card{background:rgba(255,255,255,0.05);border:1px solid var(--gold-dark);border-radius:8px;overflow:hidden;text-align:center;}
+.prg-photo{width:100%;height:70px;object-fit:cover;object-position:top center;display:block;background:#ddd;}
+.prg-photo-placeholder{width:100%;height:70px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:rgba(255,255,255,0.05);}
+.prg-body{padding:5px 7px;}
+.prg-name{font-size:0.6rem;color:var(--cream);font-weight:600;margin-bottom:2px;line-height:1.2;}
+.prg-real{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);letter-spacing:2px;}
+.prg-real-label{font-size:0.52rem;color:rgba(212,175,55,0.6);letter-spacing:1px;text-transform:uppercase;}
+
+.player-result-block{background:rgba(255,255,255,0.04);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:12px;margin-bottom:9px;}
+.player-result-block.winner{border-color:var(--gold);background:rgba(212,175,55,0.08);}
+.prb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.prb-name{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:3px;color:var(--gold);}
+.prb-badge{font-size:0.68rem;padding:2px 9px;border-radius:12px;letter-spacing:1px;font-weight:600;}
+.prb-badge.win{background:rgba(212,175,55,0.2);color:var(--gold);border:1px solid var(--gold-dark);}
+.prb-badge.bust{background:rgba(192,57,43,0.2);color:var(--red-bright);border:1px solid var(--red);}
+.prb-badge.lose{background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.15);}
+
+.prb-compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:9px;}
+.pcc-block{background:rgba(0,0,0,0.3);border-radius:6px;padding:7px 9px;text-align:center;}
+.pcc-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;opacity:0.6;display:block;}
+.pcc-val{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;display:block;}
+.pcc-diff{font-size:0.67rem;margin-top:1px;}
+
+.prb-cards-section{}
+.prb-cards-label{font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;opacity:0.5;margin-bottom:5px;}
+.prb-cards-row{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start;}
+.prc-card{background:var(--card-bg);border-radius:6px;overflow:hidden;width:62px;box-shadow:0 2px 8px rgba(0,0,0,0.4),0 0 0 1.5px var(--gold-dark);}
+.prc-photo{width:62px;height:48px;object-fit:cover;object-position:top center;display:block;background:#ddd;}
+.prc-photo-placeholder{width:62px;height:48px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:#e8e4d9;}
+.prc-body{padding:2px 3px;text-align:center;}
+.prc-name{font-size:0.48rem;color:#444;font-weight:600;line-height:1.1;}
+.prc-real{font-family:'Bebas Neue',sans-serif;font-size:0.95rem;color:var(--deep-green);letter-spacing:1px;display:block;}
+.prc-est{font-size:0.48rem;color:var(--blue);display:block;}
+
+.est-vs-real-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.evr-block{flex:1;min-width:120px;background:rgba(0,0,0,0.25);border-radius:6px;padding:6px 10px;text-align:center;}
+.evr-label{font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;opacity:0.6;display:block;}
+.evr-val{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;display:block;}
+.evr-diff{font-size:0.68rem;margin-top:2px;}
+
+.flex-center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+.mt-16{margin-top:16px;}
+.mt-8{margin-top:8px;}
+.text-center{text-align:center;}
+.final-rank-item{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid rgba(212,175,55,0.12);font-size:0.85rem;}
+.final-rank-item:last-child{border:none;}
+.final-rank-item.champion{background:rgba(212,175,55,0.08);border-radius:8px;}
+.fri-score{font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--gold);}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gold-dark);border-radius:2px;}
+@media(max-width:600px){
+  .mode-card{width:145px;padding:18px 12px;}
+  .celeb-photo-card{flex-direction:column;align-items:center;text-align:center;}
+  .pozo-grid{grid-template-columns:1fr 1fr;}
+  .prb-compare-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="title-main">Celebrity Age Blackjack</div>
+  <div class="title-sub">Estimá edades · Armá tu Pozo · Jugá sin pasarte</div>
+  <div class="border-line"></div>
+</header>
+<div class="container">
+
+<!-- MENU -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-cards">
+    <div class="mode-card" onclick="selectMode('multi')">
+      <span class="mode-icon">👥</span>
+      <div class="mode-title">Multijugador</div>
+      <div class="mode-desc">2–5 jugadores. Cada uno estima su Pozo y juega con cartas únicas.</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('ai')">
+      <span class="mode-icon">🤖</span>
+      <div class="mode-title">Vs IA</div>
+      <div class="mode-desc">Jugá contra Claude. La IA estima y decide autónomamente.</div>
+    </div>
+    <div class="mode-card" onclick="selectMode('solo')">
+      <span class="mode-icon">🎯</span>
+      <div class="mode-title">Solo</div>
+      <div class="mode-desc">Practicá tu intuición contra tu propio Pozo.</div>
+    </div>
+  </div>
+  <div class="text-center mt-16">
+    <p style="font-size:0.75rem;opacity:0.5;line-height:1.7">
+      <strong style="color:var(--blue-light)">Fase 1 — El Pozo:</strong> 4 celebridades. Estimá sus edades. La suma es tu límite personal.<br>
+      <strong style="color:var(--gold)">Fase 2 — La Partida:</strong> Cartas únicas. Estimá en vivo cada edad. No te pases de tu Pozo.
+    </p>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="screen-setup" class="screen">
+  <div class="setup-box">
+    <h2>Configurar Partida</h2>
+    <div class="input-row" id="num-players-row">
+      <label>Número de Jugadores</label>
+      <select id="num-players" onchange="updatePlayerNames()">
+        <option value="2">2 jugadores</option>
+        <option value="3">3 jugadores</option>
+        <option value="4">4 jugadores</option>
+        <option value="5">5 jugadores</option>
+      </select>
+    </div>
+    <div id="player-names-container"></div>
+    <div class="input-row">
+      <label>Rondas a jugar</label>
+      <select id="num-rounds">
+        <option value="3">3 rondas</option>
+        <option value="5" selected>5 rondas</option>
+        <option value="7">7 rondas</option>
+      </select>
+    </div>
+    <button class="btn btn-gold btn-block mt-16" onclick="startGame()">¡Comenzar!</button>
+    <button class="btn btn-outline btn-block mt-8" onclick="showScreen('screen-menu')">Volver</button>
+  </div>
+</div>
+
+<!-- FASE 1: POZO -->
+<div id="screen-pozo" class="screen">
+  <div class="game-header">
+    <div class="round-info">Ronda <span id="pz-round-cur">1</span> / <span id="pz-round-tot">5</span></div>
+    <div class="phase-banner"><span class="phase-pill pozo">⚡ Fase 1 — El Pozo</span></div>
+    <button class="btn btn-outline btn-sm" onclick="showScreen('screen-menu')">Salir</button>
+  </div>
+  <div class="divider"></div>
+  <p style="text-align:center;font-size:0.76rem;opacity:0.65;margin-bottom:10px">Estas son las 4 celebridades de la ronda. Estimá la edad de cada una. La suma será tu <strong style="color:var(--blue-light)">Pozo personal</strong>.</p>
+  <div class="pozo-grid" id="pozo-grid"></div>
+  <div class="estimates-section">
+    <h3>✏️ Estimaciones por Jugador</h3>
+    <div id="estimates-container"></div>
+  </div>
+  <div class="flex-center mt-16">
+    <button class="btn btn-blue" onclick="confirmPozo()">Confirmar Pozos →</button>
+  </div>
+</div>
+
+<!-- FASE 2: PARTIDA -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="round-info">Ronda <span id="gm-round-cur">1</span> / <span id="gm-round-tot">5</span></div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <button class="btn btn-outline btn-sm" onclick="showScreen('screen-menu')">Salir</button>
+  </div>
+  <div class="phase-banner"><span class="phase-pill partida">🃏 Fase 2 — La Partida</span></div>
+  <div class="turn-banner"><div class="turn-text" id="turn-text">—</div></div>
+
+  <div style="margin:8px 0;" id="celeb-zone">
+    <div class="celebrity-label" style="text-align:center;font-size:0.67rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:6px;">Celebridad</div>
+    <div class="celeb-photo-card" id="celeb-photo-card">
+      <div class="celeb-photo-wrap" id="celeb-photo-wrap"><span>⭐</span></div>
+      <div class="celeb-photo-info">
+        <div class="celeb-name" id="celeb-name">—</div>
+        <div class="celeb-category" id="celeb-category">—</div>
+        <div class="celeb-hint" id="celeb-hint"></div>
+        <div class="age-reveal-inline" id="age-reveal">
+          <span class="age-number" id="age-number">—</span>
+          <span class="age-label">años reales</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE ESTIMATE INPUT -->
+  <div class="live-est-zone" id="live-est-zone">
+    <span class="live-est-label">📝 ¿Cuántos años creés que tiene?</span>
+    <div class="live-est-input-row">
+      <input type="number" class="live-est-input" id="live-est-input" min="1" max="120" placeholder="??" oninput="updateLiveRunning()">
+      <button class="btn btn-blue live-est-confirm" onclick="confirmEstimate()">Confirmar →</button>
+      <div class="live-est-running" id="live-est-running">Suma estimada: <strong>0</strong></div>
+    </div>
+  </div>
+
+  <div style="margin:7px 0;">
+    <div style="font-size:0.67rem;letter-spacing:3px;text-transform:uppercase;color:var(--cream);opacity:0.6;text-align:center;margin-bottom:5px;">Cartas acumuladas</div>
+    <div class="cards-row" id="cards-row"></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="stat-block"><span class="stat-label">Total Real</span><span class="stat-val" id="total-display">0</span></div>
+    <div class="stat-sep">/</div>
+    <div class="stat-block"><span class="stat-label">Mi Pozo</span><span class="stat-val pozo-val" id="pozo-display">—</span></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bg"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="ai-thinking" id="ai-thinking">🤖 Claude está pensando...</div>
+
+  <div class="action-zone" id="action-zone">
+    <button class="btn btn-gold" id="btn-hit" onclick="playerHit()">🃏 Tomar Carta</button>
+    <button class="btn btn-outline" id="btn-stand" onclick="playerStand()">✋ Plantarse</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="game-log" id="game-log"></div>
+</div>
+
+<!-- RESULTADO RONDA -->
+<div id="screen-result" class="screen">
+  <div class="result-box">
+    <span class="result-trophy" id="result-trophy">🏆</span>
+    <div class="result-title" id="result-title">Resultados</div>
+    <div class="result-summary" id="result-summary"></div>
+    <div class="result-section-title">⭐ Las 4 Celebridades del Pozo — Edades Reales</div>
+    <div class="pozo-reveal-grid" id="pozo-reveal-grid"></div>
+    <div style="text-align:center;margin-bottom:4px;">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:0.82rem;letter-spacing:3px;color:var(--gold)">Pozo Real Total:</span>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold);letter-spacing:3px;margin-left:8px" id="pozo-real-total">—</span>
+    </div>
+    <div class="result-section-title gold">🃏 Resultados por Jugador</div>
+    <div id="players-result-container"></div>
+    <div class="flex-center mt-16">
+      <button class="btn btn-gold" id="btn-next-round" onclick="nextRound()">Siguiente Ronda →</button>
+      <button class="btn btn-outline" onclick="showScreen('screen-menu')">Menú</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL -->
+<div id="screen-final" class="screen">
+  <div class="result-box">
+    <span class="result-trophy">🏆</span>
+    <div class="result-title" id="final-title">¡Campeón!</div>
+    <div class="result-summary" id="final-summary"></div>
+    <div id="final-rank-list"></div>
+    <div class="flex-center mt-16">
+      <button class="btn btn-gold" onclick="showScreen('screen-menu')">Jugar de Nuevo</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 300 CELEBRITIES DATABASE
+// ══════════════════════════════════════════════════════════════
+const CELEBRITIES = [
+// ── MÚSICA POP / URBANO ──
+{name:"Taylor Swift",wiki:"Taylor Swift",emoji:"🎤",cat:"Cantante Pop",hint:"Autora de sus propias eras",age:35},
+{name:"Bad Bunny",wiki:"Bad Bunny",emoji:"🐰",cat:"Cantante Urbano",hint:"El rey del reggaetón global",age:30},
+{name:"Beyoncé",wiki:"Beyoncé",emoji:"👑",cat:"Cantante / Actriz",hint:"Reina del Coachella",age:43},
+{name:"Dua Lipa",wiki:"Dua Lipa",emoji:"💃",cat:"Cantante Pop",hint:"Future Nostalgia, ícono de moda",age:29},
+{name:"Harry Styles",wiki:"Harry Styles",emoji:"🌻",cat:"Cantante Pop",hint:"Ex One Direction",age:31},
+{name:"Billie Eilish",wiki:"Billie Eilish",emoji:"🖤",cat:"Cantante Pop",hint:"Ganó un Oscar de adolescente",age:23},
+{name:"Drake",wiki:"Drake (musician)",emoji:"🦉",cat:"Rapero",hint:"Empezó actuando en Degrassi",age:38},
+{name:"Rihanna",wiki:"Rihanna",emoji:"☂️",cat:"Cantante / Empresaria",hint:"Dueña de Fenty Beauty",age:37},
+{name:"Post Malone",wiki:"Post Malone",emoji:"🍺",cat:"Cantante / Rapero",hint:"Tatuajes faciales icónicos",age:29},
+{name:"Lady Gaga",wiki:"Lady Gaga",emoji:"🎭",cat:"Cantante / Actriz",hint:"Nació en New York, ama el teatro",age:38},
+{name:"Justin Bieber",wiki:"Justin Bieber",emoji:"🎵",cat:"Cantante Pop",hint:"Descubierto en YouTube de niño",age:31},
+{name:"Ariana Grande",wiki:"Ariana Grande",emoji:"🍩",cat:"Cantante Pop",hint:"Ponytail icónica, ex Nickelodeon",age:32},
+{name:"Ed Sheeran",wiki:"Ed Sheeran",emoji:"🎸",cat:"Cantante / Compositor",hint:"Guitarrista pelirrojo de Shape of You",age:34},
+{name:"Adele",wiki:"Adele",emoji:"🌹",cat:"Cantante Pop",hint:"Voz poderosa, nacida en Londres",age:37},
+{name:"Shakira",wiki:"Shakira",emoji:"🐺",cat:"Cantante",hint:"Sus caderas no mienten",age:48},
+{name:"J Balvin",wiki:"J Balvin",emoji:"🌈",cat:"Cantante Urbano",hint:"Colores, streetwear colombiano",age:40},
+{name:"Maluma",wiki:"Maluma (singer)",emoji:"🌴",cat:"Cantante Urbano",hint:"Colombiano, fan del fútbol",age:31},
+{name:"Rosalía",wiki:"Rosalía",emoji:"🌹",cat:"Cantante",hint:"Fusionó el flamenco con R&B",age:31},
+{name:"Camila Cabello",wiki:"Camila Cabello",emoji:"🦋",cat:"Cantante Pop",hint:"Ex Fifth Harmony, cantó Havana",age:28},
+{name:"Karol G",wiki:"Karol G",emoji:"💙",cat:"Cantante Urbana",hint:"La Bichota, de Medellín",age:34},
+{name:"Peso Pluma",wiki:"Peso Pluma",emoji:"🌵",cat:"Regional Mexicano",hint:"Corridos tumbados",age:25},
+{name:"Olivia Rodrigo",wiki:"Olivia Rodrigo",emoji:"💜",cat:"Cantante Pop",hint:"drivers license la hizo famosa",age:22},
+{name:"The Weeknd",wiki:"The Weeknd",emoji:"🌙",cat:"Cantante R&B",hint:"Conocido por Blinding Lights",age:35},
+{name:"Nicki Minaj",wiki:"Nicki Minaj",emoji:"🦄",cat:"Rapera",hint:"Reina del rap femenino",age:42},
+{name:"Daddy Yankee",wiki:"Daddy Yankee",emoji:"🏆",cat:"Cantante Urbano",hint:"El Rey del Reggaeton, Gasolina",age:48},
+{name:"Marc Anthony",wiki:"Marc Anthony",emoji:"🎺",cat:"Cantante Salsa",hint:"Rey de la salsa en español",age:57},
+{name:"Miley Cyrus",wiki:"Miley Cyrus",emoji:"🦋",cat:"Cantante / Actriz",hint:"Ex Hannah Montana, Flowers",age:32},
+{name:"Selena Gomez",wiki:"Selena Gomez",emoji:"🌸",cat:"Cantante / Actriz",hint:"Ex Disney, fundó Rare Beauty",age:33},
+{name:"Cardi B",wiki:"Cardi B",emoji:"💅",cat:"Rapera",hint:"WAP, Bodak Yellow",age:32},
+{name:"Feid",wiki:"Feid (singer)",emoji:"🌙",cat:"Cantante Urbano",hint:"Ferxxo, colombiano",age:32},
+{name:"Myke Towers",wiki:"Myke Towers",emoji:"🗼",cat:"Cantante Urbano",hint:"Puertorriqueño con flow propio",age:28},
+{name:"Rauw Alejandro",wiki:"Rauw Alejandro",emoji:"🌊",cat:"Cantante Urbano",hint:"El favorito de Puerto Rico",age:27},
+{name:"María Becerra",wiki:"María Becerra",emoji:"🇦🇷",cat:"Cantante",hint:"La Nena de Argentina",age:25},
+{name:"Paulo Londra",wiki:"Paulo Londra",emoji:"🇦🇷",cat:"Cantante",hint:"Trap argentino, volvió con fuerza",age:27},
+{name:"Nicki Nicole",wiki:"Nicki Nicole",emoji:"🇦🇷",cat:"Cantante",hint:"Trap de Rosario para el mundo",age:24},
+{name:"Tini Stoessel",wiki:"Tini Stoessel",emoji:"🦋",cat:"Cantante / Actriz",hint:"Ex Violetta de Disney",age:28},
+{name:"Natanael Cano",wiki:"Natanael Cano",emoji:"🤠",cat:"Regional Mexicano",hint:"Pionero corridos tumbados",age:23},
+{name:"Aitana López",wiki:"Aitana (singer)",emoji:"🌸",cat:"Cantante / Influencer",hint:"Ex OT, pop español",age:25},
+{name:"Lele Pons",wiki:"Lele Pons",emoji:"📱",cat:"Influencer / Cantante",hint:"Venezolana, reina de TikTok",age:28},
+{name:"Kali Uchis",wiki:"Kali Uchis",emoji:"🌺",cat:"Cantante R&B",hint:"Colombo-americana, voz única",age:31},
+{name:"Anuel AA",wiki:"Anuel AA",emoji:"👁️",cat:"Cantante Urbano",hint:"Real Hasta la Muerte",age:32},
+{name:"Ozuna",wiki:"Ozuna (singer)",emoji:"🌊",cat:"Cantante Urbano",hint:"El Negrito de Ojos Claros",age:33},
+{name:"Sech",wiki:"Sech",emoji:"🎸",cat:"Cantante Urbano",hint:"Panameño, Otro Trago",age:29},
+{name:"Jhayco",wiki:"Jhayco",emoji:"🌊",cat:"Cantante Urbano",hint:"Puerto Rico, Sigan bailando",age:28},
+{name:"Bizarrap",wiki:"Bizarrap",emoji:"🎧",cat:"DJ / Productor",hint:"Argentino, Music Sessions virales",age:25},
+{name:"Eminem",wiki:"Eminem",emoji:"🎤",cat:"Rapero",hint:"Slim Shady, de Detroit",age:52},
+{name:"Kanye West",wiki:"Kanye West",emoji:"🎹",cat:"Rapero / Productor",hint:"Ahora se llama Ye",age:47},
+{name:"Bruno Mars",wiki:"Bruno Mars",emoji:"🌟",cat:"Cantante Pop / R&B",hint:"Hawaiano, Just the Way You Are",age:39},
+{name:"Doja Cat",wiki:"Doja Cat",emoji:"🐱",cat:"Cantante / Rapera",hint:"Say So, Planet Her",age:29},
+{name:"SZA",wiki:"SZA",emoji:"🌿",cat:"Cantante R&B",hint:"Ctrl, Kill Bill, grammy winner",age:35},
+{name:"Lana Del Rey",wiki:"Lana Del Rey",emoji:"🎠",cat:"Cantante Pop",hint:"Aesthetic melancólico, Summertime Sadness",age:40},
+{name:"Sabrina Carpenter",wiki:"Sabrina Carpenter",emoji:"🍋",cat:"Cantante Pop",hint:"Espresso, Please Please Please",age:26},
+{name:"Chappell Roan",wiki:"Chappell Roan",emoji:"🌹",cat:"Cantante Pop",hint:"Midwest Princess, Hot to Go",age:27},
+{name:"Gracie Abrams",wiki:"Gracie Abrams",emoji:"🌙",cat:"Cantante Pop",hint:"Hija de J.J. Abrams, The Secret",age:25},
+{name:"Charli XCX",wiki:"Charli XCX",emoji:"💿",cat:"Cantante Pop",hint:"BRAT es el álbum del año",age:32},
+{name:"Zara Larsson",wiki:"Zara Larsson",emoji:"💫",cat:"Cantante Pop",hint:"Sueca, Lush Life",age:27},
+// ── ACTORES / ACTRICES ──
+{name:"Zendaya",wiki:"Zendaya",emoji:"🌟",cat:"Actriz / Cantante",hint:"Euphoria y Dune",age:28},
+{name:"Timothée Chalamet",wiki:"Timothée Chalamet",emoji:"🎬",cat:"Actor",hint:"Wonka, Dune, Call Me By Your Name",age:29},
+{name:"Tom Holland",wiki:"Tom Holland",emoji:"🕷️",cat:"Actor",hint:"El Spider-Man más joven del MCU",age:29},
+{name:"Florence Pugh",wiki:"Florence Pugh",emoji:"🌼",cat:"Actriz",hint:"Little Women, Oppenheimer",age:29},
+{name:"Sydney Sweeney",wiki:"Sydney Sweeney",emoji:"🌊",cat:"Actriz",hint:"Euphoria y Anyone But You",age:27},
+{name:"Pedro Pascal",wiki:"Pedro Pascal",emoji:"🪖",cat:"Actor",hint:"El Mandaloriano y Joel de TLOU",age:50},
+{name:"Margot Robbie",wiki:"Margot Robbie",emoji:"🎀",cat:"Actriz",hint:"Barbie, Harley Quinn",age:34},
+{name:"Ryan Gosling",wiki:"Ryan Gosling",emoji:"🎸",cat:"Actor",hint:"Ken en Barbie, La La Land",age:44},
+{name:"Ana de Armas",wiki:"Ana de Armas",emoji:"🦋",cat:"Actriz",hint:"Cubana, No Time to Die",age:37},
+{name:"Anya Taylor-Joy",wiki:"Anya Taylor-Joy",emoji:"♟️",cat:"Actriz",hint:"La protagonista de Gambito de Dama",age:29},
+{name:"Chris Hemsworth",wiki:"Chris Hemsworth",emoji:"⚡",cat:"Actor",hint:"Thor en el Universo Marvel",age:41},
+{name:"Cillian Murphy",wiki:"Cillian Murphy",emoji:"🎩",cat:"Actor",hint:"Peaky Blinders, Oppenheimer",age:48},
+{name:"Paul Mescal",wiki:"Paul Mescal",emoji:"🌿",cat:"Actor",hint:"Normal People, Aftersun",age:29},
+{name:"Jenna Ortega",wiki:"Jenna Ortega",emoji:"🖤",cat:"Actriz",hint:"Wednesday Addams en Netflix",age:22},
+{name:"Jacob Elordi",wiki:"Jacob Elordi",emoji:"🏄",cat:"Actor",hint:"Nate en Euphoria, Saltburn",age:27},
+{name:"Austin Butler",wiki:"Austin Butler",emoji:"🎸",cat:"Actor",hint:"Interpretó a Elvis Presley",age:33},
+{name:"Millie Bobby Brown",wiki:"Millie Bobby Brown",emoji:"🌀",cat:"Actriz",hint:"Eleven en Stranger Things",age:21},
+{name:"Ke Huy Quan",wiki:"Ke Huy Quan",emoji:"🏆",cat:"Actor",hint:"Oscar por Everything Everywhere",age:54},
+{name:"Brendan Fraser",wiki:"Brendan Fraser",emoji:"🐍",cat:"Actor",hint:"The Mummy, ganó el Oscar en 2023",age:56},
+{name:"Jennifer Lawrence",wiki:"Jennifer Lawrence",emoji:"🔥",cat:"Actriz",hint:"Katniss en Los Juegos del Hambre",age:34},
+{name:"Scarlett Johansson",wiki:"Scarlett Johansson",emoji:"⚫",cat:"Actriz",hint:"Black Widow del MCU",age:40},
+{name:"Robert Downey Jr",wiki:"Robert Downey Jr.",emoji:"🦾",cat:"Actor",hint:"Iron Man, Tony Stark",age:60},
+{name:"Meryl Streep",wiki:"Meryl Streep",emoji:"🎭",cat:"Actriz",hint:"La más nominada al Oscar de la historia",age:75},
+{name:"Denzel Washington",wiki:"Denzel Washington",emoji:"👑",cat:"Actor",hint:"Training Day, Malcolm X",age:70},
+{name:"Tom Hanks",wiki:"Tom Hanks",emoji:"🎬",cat:"Actor",hint:"Forrest Gump, Cast Away",age:68},
+{name:"Cate Blanchett",wiki:"Cate Blanchett",emoji:"🌟",cat:"Actriz",hint:"Galadriel, Tár, Tochter",age:55},
+{name:"Matt Damon",wiki:"Matt Damon",emoji:"🎬",cat:"Actor / Guionista",hint:"Jason Bourne, Good Will Hunting",age:54},
+{name:"Brad Pitt",wiki:"Brad Pitt",emoji:"🌟",cat:"Actor",hint:"Fight Club, Once Upon a Time",age:61},
+{name:"Angelina Jolie",wiki:"Angelina Jolie",emoji:"💋",cat:"Actriz",hint:"Lara Croft, Maleficent",age:49},
+{name:"Will Smith",wiki:"Will Smith",emoji:"🥊",cat:"Actor",hint:"Famoso por el cachetazo en los Oscar",age:56},
+{name:"Viola Davis",wiki:"Viola Davis",emoji:"🎭",cat:"Actriz",hint:"EGOT, How to Get Away",age:59},
+{name:"Lupita Nyong'o",wiki:"Lupita Nyong'o",emoji:"🌟",cat:"Actriz",hint:"12 Years a Slave, Black Panther",age:42},
+{name:"Dwayne Johnson",wiki:"Dwayne Johnson",emoji:"💪",cat:"Actor",hint:"La Roca, ex luchador",age:52},
+{name:"Ryan Reynolds",wiki:"Ryan Reynolds",emoji:"😏",cat:"Actor",hint:"Deadpool, Free Guy",age:48},
+{name:"Keanu Reeves",wiki:"Keanu Reeves",emoji:"🕴️",cat:"Actor",hint:"Neo en Matrix, John Wick",age:60},
+// ── DEPORTES ──
+{name:"Lionel Messi",wiki:"Lionel Messi",emoji:"⚽",cat:"Futbolista",hint:"Campeón del mundo Qatar 2022",age:37},
+{name:"Cristiano Ronaldo",wiki:"Cristiano Ronaldo",emoji:"⚽",cat:"Futbolista",hint:"CR7, juega en Arabia",age:40},
+{name:"Neymar Jr",wiki:"Neymar",emoji:"⚽",cat:"Futbolista",hint:"Brasileño, el 10 más caro",age:33},
+{name:"Kylian Mbappé",wiki:"Kylian Mbappé",emoji:"⚽",cat:"Futbolista",hint:"El más rápido de Francia",age:26},
+{name:"Vinícius Jr",wiki:"Vinícius Júnior",emoji:"⚽",cat:"Futbolista",hint:"Brasileño del Real Madrid",age:24},
+{name:"Erling Haaland",wiki:"Erling Haaland",emoji:"⚽",cat:"Futbolista",hint:"Noruego, máquina de goles",age:24},
+{name:"LeBron James",wiki:"LeBron James",emoji:"🏀",cat:"Basquetbolista",hint:"El Rey, 4 anillos NBA",age:40},
+{name:"Stephen Curry",wiki:"Stephen Curry",emoji:"🏀",cat:"Basquetbolista",hint:"El mejor tirador NBA ever",age:37},
+{name:"Serena Williams",wiki:"Serena Williams",emoji:"🎾",cat:"Tenista",hint:"23 Grand Slams, leyenda",age:43},
+{name:"Carlos Alcaraz",wiki:"Carlos Alcaraz",emoji:"🎾",cat:"Tenista",hint:"Murciano, ganó Wimbledon a los 21",age:22},
+{name:"Novak Djokovic",wiki:"Novak Djokovic",emoji:"🎾",cat:"Tenista",hint:"24 Grand Slams, el más grande",age:38},
+{name:"Simone Biles",wiki:"Simone Biles",emoji:"🤸",cat:"Gimnasta",hint:"GOAT de la gimnasia artística",age:28},
+{name:"Canelo Álvarez",wiki:"Canelo Álvarez",emoji:"🥊",cat:"Boxeador",hint:"Campeón mundial súper mediano",age:34},
+{name:"Naomi Osaka",wiki:"Naomi Osaka",emoji:"🎾",cat:"Tenista",hint:"Japonesa-haitiana, 4 Grand Slams",age:27},
+{name:"Rafael Nadal",wiki:"Rafael Nadal",emoji:"🎾",cat:"Tenista",hint:"El Rey de la Arcilla, 22 Slams",age:38},
+{name:"Roger Federer",wiki:"Roger Federer",emoji:"🎾",cat:"Tenista",hint:"20 Grand Slams, elegancia suiza",age:43},
+{name:"Usain Bolt",wiki:"Usain Bolt",emoji:"⚡",cat:"Atleta",hint:"El hombre más rápido de la historia",age:38},
+{name:"Michael Jordan",wiki:"Michael Jordan",emoji:"🏀",cat:"Ex Basquetbolista",hint:"6 anillos, Air Jordan",age:62},
+{name:"Tiger Woods",wiki:"Tiger Woods",emoji:"⛳",cat:"Golfista",hint:"15 majors, leyenda del golf",age:49},
+{name:"Ronaldinho",wiki:"Ronaldinho",emoji:"⚽",cat:"Ex Futbolista",hint:"El mago brasileño del Barça",age:45},
+{name:"Zinedine Zidane",wiki:"Zinedine Zidane",emoji:"⚽",cat:"Ex Futbolista / DT",hint:"Tres Champions como entrenador",age:52},
+{name:"Gisele Bündchen",wiki:"Gisele Bündchen",emoji:"🌊",cat:"Modelo / Empresaria",hint:"Ex de Tom Brady, brasileña",age:44},
+{name:"Naomi Campbell",wiki:"Naomi Campbell",emoji:"👠",cat:"Modelo",hint:"Supermodelo icónica de los 90",age:54},
+{name:"Fernando Alonso",wiki:"Fernando Alonso",emoji:"🏎️",cat:"Piloto F1",hint:"Doble campeón F1, asturiano",age:43},
+{name:"Max Verstappen",wiki:"Max Verstappen",emoji:"🏎️",cat:"Piloto F1",hint:"Cuádruple campeón F1, neerlandés",age:27},
+// ── TECNOLOGÍA ──
+{name:"Elon Musk",wiki:"Elon Musk",emoji:"🚀",cat:"Empresario / CEO",hint:"Tesla, SpaceX, compró X/Twitter",age:53},
+{name:"Mark Zuckerberg",wiki:"Mark Zuckerberg",emoji:"📘",cat:"CEO de Meta",hint:"Fundó Facebook en Harvard",age:41},
+{name:"Sam Altman",wiki:"Sam Altman",emoji:"🤖",cat:"CEO / OpenAI",hint:"El jefe de ChatGPT",age:40},
+{name:"Jeff Bezos",wiki:"Jeff Bezos",emoji:"📦",cat:"Fundador de Amazon",hint:"El hombre más rico del mundo",age:61},
+{name:"Bill Gates",wiki:"Bill Gates",emoji:"💻",cat:"Cofundador de Microsoft",hint:"Fundó Microsoft, hoy filántropo",age:69},
+{name:"Steve Jobs",wiki:"Steve Jobs",emoji:"🍎",cat:"Ex CEO de Apple",hint:"Creó el iPhone, falleció en 2011",age:56},
+// ── INFLUENCERS / STREAMERS ──
+{name:"MrBeast",wiki:"MrBeast",emoji:"💰",cat:"YouTuber",hint:"El youtuber más visto del mundo",age:27},
+{name:"Khaby Lame",wiki:"Khaby Lame",emoji:"😶",cat:"TikToker",hint:"El TikToker con más seguidores",age:24},
+{name:"Luisito Comunica",wiki:"Luisito Comunica",emoji:"🌎",cat:"YouTuber",hint:"Viajero mexicano de YouTube",age:33},
+{name:"Ibai Llanos",wiki:"Ibai Llanos",emoji:"🎮",cat:"Streamer",hint:"La Velada del Año, español",age:30},
+{name:"Kim Kardashian",wiki:"Kim Kardashian",emoji:"💄",cat:"Influencer / Empresaria",hint:"SKIMS, reality shows",age:44},
+{name:"Kylie Jenner",wiki:"Kylie Jenner",emoji:"💄",cat:"Influencer / Empresaria",hint:"La más joven de las Kardashians",age:27},
+{name:"Kendall Jenner",wiki:"Kendall Jenner",emoji:"📸",cat:"Modelo / Influencer",hint:"La modelo de las Kardashians",age:29},
+{name:"Pokimane",wiki:"Pokimane",emoji:"🎮",cat:"Streamer",hint:"La streamer más popular de Twitch",age:29},
+{name:"Auronplay",wiki:"Auronplay",emoji:"⚔️",cat:"Streamer",hint:"Los Juegos del Calamar en Twitch",age:34},
+// ── REALEZA / POLÍTICA ──
+{name:"Meghan Markle",wiki:"Meghan Markle",emoji:"👸",cat:"Ex Duquesa",hint:"Se casó con el Príncipe Harry",age:43},
+{name:"Príncipe Harry",wiki:"Prince Harry",emoji:"🎖️",cat:"Realeza",hint:"Escribió Spare, vive en California",age:41},
+{name:"Príncipe William",wiki:"Prince William",emoji:"👑",cat:"Realeza Británica",hint:"Heredero al trono británico",age:43},
+{name:"Rey Carlos III",wiki:"Charles III",emoji:"👑",cat:"Rey de Gran Bretaña",hint:"Asumió la corona tras la muerte de la Reina Isabel",age:76},
+// ── DIRECTORES / CINE ──
+{name:"Christopher Nolan",wiki:"Christopher Nolan",emoji:"🎬",cat:"Director de Cine",hint:"Oppenheimer, Inception, Interstellar",age:55},
+{name:"Greta Gerwig",wiki:"Greta Gerwig",emoji:"🎀",cat:"Directora / Actriz",hint:"Dirigió Barbie y Lady Bird",age:42},
+{name:"Steven Spielberg",wiki:"Steven Spielberg",emoji:"🎬",cat:"Director",hint:"Tiburón, Indiana Jones, Schindler's List",age:78},
+{name:"Quentin Tarantino",wiki:"Quentin Tarantino",emoji:"🩸",cat:"Director",hint:"Pulp Fiction, Kill Bill",age:61},
+{name:"Pedro Almodóvar",wiki:"Pedro Almodóvar",emoji:"🎭",cat:"Director Español",hint:"Maestro del cine español",age:75},
+{name:"Martin Scorsese",wiki:"Martin Scorsese",emoji:"🎬",cat:"Director",hint:"The Godfather, The Departed",age:82},
+// ── SERIES / TV ──
+{name:"Jenna Ortega",wiki:"Jenna Ortega",emoji:"🖤",cat:"Actriz",hint:"Wednesday Addams en Netflix",age:22},
+{name:"Kit Harington",wiki:"Kit Harington",emoji:"🐉",cat:"Actor",hint:"Jon Snow en Game of Thrones",age:38},
+{name:"Emilia Clarke",wiki:"Emilia Clarke",emoji:"🐲",cat:"Actriz",hint:"Daenerys en Game of Thrones",age:38},
+{name:"Pedro Pascal",wiki:"Pedro Pascal",emoji:"🪖",cat:"Actor",hint:"Mandaloriano, Joel de TLOU",age:50},
+// ── MÚSICA CLÁSICA / LEYENDAS ──
+{name:"Paul McCartney",wiki:"Paul McCartney",emoji:"🎸",cat:"Músico / The Beatles",hint:"Escribió Yesterday, leyenda viva",age:83},
+{name:"Elton John",wiki:"Elton John",emoji:"🎹",cat:"Músico / Leyenda",hint:"Rocketman, Crocodile Rock",age:78},
+{name:"Madonna",wiki:"Madonna",emoji:"👑",cat:"Reina del Pop",hint:"La Reina del Pop desde los 80",age:67},
+{name:"Mick Jagger",wiki:"Mick Jagger",emoji:"💋",cat:"Rolling Stones",hint:"Vocalista de los Rolling Stones",age:81},
+{name:"Bob Dylan",wiki:"Bob Dylan",emoji:"🎶",cat:"Músico / Nobel",hint:"Premio Nobel de Literatura 2016",age:84},
+{name:"Sting",wiki:"Sting (musician)",emoji:"🎸",cat:"Cantante / The Police",hint:"Every Breath You Take",age:73},
+{name:"Bono",wiki:"Bono",emoji:"🎤",cat:"Cantante / U2",hint:"Vocalista de U2, activista",age:65},
+{name:"Bruce Springsteen",wiki:"Bruce Springsteen",emoji:"🎸",cat:"Músico",hint:"The Boss, Born to Run",age:76},
+{name:"Stevie Wonder",wiki:"Stevie Wonder",emoji:"🎹",cat:"Músico / Leyenda",hint:"Superstition, cieguito desde niño",age:75},
+{name:"Diana Ross",wiki:"Diana Ross",emoji:"🌹",cat:"Cantante",hint:"Lideró The Supremes",age:81},
+{name:"Aretha Franklin",wiki:"Aretha Franklin",emoji:"👑",cat:"Cantante (fallecida)",hint:"La Reina del Soul, RESPECT",age:76},
+{name:"Whitney Houston",wiki:"Whitney Houston",emoji:"🎤",cat:"Cantante (fallecida)",hint:"I Will Always Love You",age:48},
+{name:"Michael Jackson",wiki:"Michael Jackson",emoji:"🕺",cat:"Rey del Pop (fallecido)",hint:"Thriller, la danza del moonwalk",age:50},
+{name:"Prince",wiki:"Prince (musician)",emoji:"🟣",cat:"Músico (fallecido)",hint:"Purple Rain, Sign o the Times",age:57},
+{name:"David Bowie",wiki:"David Bowie",emoji:"⚡",cat:"Músico (fallecido)",hint:"Ziggy Stardust, Space Oddity",age:69},
+{name:"Freddie Mercury",wiki:"Freddie Mercury",emoji:"🎤",cat:"Cantante / Queen (fallecido)",hint:"Bohemian Rhapsody, We Are the Champions",age:45},
+// ── HUMORISTAS ──
+{name:"Kevin Hart",wiki:"Kevin Hart",emoji:"🤣",cat:"Comediante / Actor",hint:"El comediante más famoso de USA",age:45},
+{name:"Chris Rock",wiki:"Chris Rock",emoji:"🎤",cat:"Comediante",hint:"Famoso por el incidente del Oscar",age:60},
+{name:"Jerry Seinfeld",wiki:"Jerry Seinfeld",emoji:"😄",cat:"Comediante / Actor",hint:"La comedia sobre nada",age:71},
+{name:"Dave Chappelle",wiki:"Dave Chappelle",emoji:"🎤",cat:"Comediante",hint:"Chappelle's Show, stand-up legendario",age:51},
+{name:"Ellen DeGeneres",wiki:"Ellen DeGeneres",emoji:"🌈",cat:"Comediante / Conductora",hint:"Finding Nemo, The Ellen Show",age:67},
+{name:"Jimmy Fallon",wiki:"Jimmy Fallon",emoji:"😂",cat:"Conductor / Comediante",hint:"The Tonight Show",age:51},
+{name:"Conan O'Brien",wiki:"Conan O'Brien",emoji:"🎤",cat:"Conductor",hint:"Pelirrojo, late night legend",age:62},
+// ── CIENCIA / INTELECTUALES ──
+{name:"Neil deGrasse Tyson",wiki:"Neil deGrasse Tyson",emoji:"🌌",cat:"Astrofísico",hint:"Popularizó la cosmología",age:66},
+{name:"Yuval Noah Harari",wiki:"Yuval Noah Harari",emoji:"📚",cat:"Historiador / Escritor",hint:"Escribió Sapiens y Homo Deus",age:49},
+{name:"Malala Yousafzai",wiki:"Malala Yousafzai",emoji:"📖",cat:"Activista / Nobel",hint:"Nobel de la Paz más joven ever",age:27},
+{name:"Greta Thunberg",wiki:"Greta Thunberg",emoji:"🌱",cat:"Activista Climática",hint:"Fridays for Future",age:22},
+// ── MODA ──
+{name:"Donatella Versace",wiki:"Donatella Versace",emoji:"👗",cat:"Diseñadora",hint:"Directora creativa de Versace",age:69},
+{name:"Anna Wintour",wiki:"Anna Wintour",emoji:"👓",cat:"Editora Vogue",hint:"La poderosa editora de Vogue USA",age:75},
+// ── EDAD AVANZADA (70+) ──
+{name:"Queen Elizabeth II",wiki:"Elizabeth II",emoji:"👑",cat:"Ex Reina de GB (fallecida)",hint:"Reinó 70 años, falleció en 2022",age:96},
+{name:"Joe Biden",wiki:"Joe Biden",emoji:"🇺🇸",cat:"Ex Presidente USA",hint:"Fue el presidente más viejo de USA",age:82},
+{name:"Henry Kissinger",wiki:"Henry Kissinger",emoji:"🌐",cat:"Ex Secretario Estado",hint:"Nobel de la Paz, falleció en 2023",age:100},
+{name:"Jimmy Carter",wiki:"Jimmy Carter",emoji:"🇺🇸",cat:"Ex Presidente USA",hint:"Presidente número 39, falleció 2024",age:100},
+{name:"Warren Buffett",wiki:"Warren Buffett",emoji:"💰",cat:"Inversor",hint:"El Oráculo de Omaha",age:94},
+{name:"Charlie Munger",wiki:"Charlie Munger",emoji:"💼",cat:"Inversor (fallecido)",hint:"Mano derecha de Buffett",age:99},
+{name:"Kirk Douglas",wiki:"Kirk Douglas",emoji:"⭐",cat:"Actor (fallecido)",hint:"Espartaco, falleció a los 103 años",age:103},
+{name:"Betty White",wiki:"Betty White",emoji:"🌹",cat:"Actriz (fallecida)",hint:"Golden Girls, murió a los 99 años",age:99},
+{name:"Clint Eastwood",wiki:"Clint Eastwood",emoji:"🤠",cat:"Actor / Director",hint:"Dirty Harry, los spaghetti western",age:94},
+{name:"Morgan Freeman",wiki:"Morgan Freeman",emoji:"🎬",cat:"Actor",hint:"Se Busca a Dios, Shawshank",age:87},
+{name:"Anthony Hopkins",wiki:"Anthony Hopkins",emoji:"🎭",cat:"Actor",hint:"Hannibal Lecter, ganó el Oscar",age:87},
+{name:"Al Pacino",wiki:"Al Pacino",emoji:"🔫",cat:"Actor",hint:"El Padrino, Scarface",age:84},
+{name:"Robert De Niro",wiki:"Robert De Niro",emoji:"🎬",cat:"Actor",hint:"Taxi Driver, Goodfellas",age:81},
+{name:"Harrison Ford",wiki:"Harrison Ford",emoji:"🚀",cat:"Actor",hint:"Indiana Jones, Han Solo",age:82},
+{name:"Jack Nicholson",wiki:"Jack Nicholson",emoji:"😈",cat:"Actor",hint:"The Shining, As Good as It Gets",age:87},
+{name:"Sophia Loren",wiki:"Sophia Loren",emoji:"🌹",cat:"Actriz Italiana",hint:"Leyenda del cine italiano",age:90},
+{name:"Jean-Paul Belmondo",wiki:"Jean-Paul Belmondo",emoji:"🎬",cat:"Actor Francés (fallecido)",hint:"Ícono de la Nouvelle Vague",age:88},
+{name:"Brigitte Bardot",wiki:"Brigitte Bardot",emoji:"🌟",cat:"Actriz / Activista",hint:"Símbolo sexual de los 60",age:90},
+{name:"Jane Fonda",wiki:"Jane Fonda",emoji:"💪",cat:"Actriz / Activista",hint:"Klute, Nine to Five, activista",age:87},
+{name:"Judi Dench",wiki:"Judi Dench",emoji:"🎭",cat:"Actriz",hint:"M en James Bond, nominada mil veces",age:90},
+{name:"Maggie Smith",wiki:"Maggie Smith",emoji:"🪄",cat:"Actriz (fallecida)",hint:"Profesora McGonagall, Downton Abbey",age:89},
+{name:"Doris Day",wiki:"Doris Day",emoji:"🌷",cat:"Actriz / Cantante (fallecida)",hint:"Que Sera Sera, ícono de Hollywood",age:97},
+{name:"Sidney Poitier",wiki:"Sidney Poitier",emoji:"🏆",cat:"Actor (fallecido)",hint:"Primer negro en ganar el Oscar como actor",age:94},
+{name:"Dick Van Dyke",wiki:"Dick Van Dyke",emoji:"🎩",cat:"Actor / Comediante",hint:"Mary Poppins, Chitty Chitty Bang Bang",age:99},
+{name:"Norman Lear",wiki:"Norman Lear",emoji:"📺",cat:"Productor TV (fallecido)",hint:"Creó All in the Family, murió a los 101",age:101},
+{name:"Bob Barker",wiki:"Bob Barker",emoji:"🎰",cat:"Conductor TV (fallecido)",hint:"The Price is Right, murió a los 99",age:99},
+// ── PERSONAJES DE ANIMACIÓN / DOBLAJE ──
+{name:"Homer Simpson",wiki:"The Simpsons",emoji:"🍩",cat:"Personaje Animado",hint:"¡D'oh! Padre de Bart y Lisa",age:39},
+{name:"Bart Simpson",wiki:"Bart Simpson",emoji:"🛹",cat:"Personaje Animado",hint:"El niño travieso de Springfield",age:10},
+{name:"Mickey Mouse",wiki:"Mickey Mouse",emoji:"🐭",cat:"Personaje Disney",hint:"El ratón más famoso del mundo",age:97},
+{name:"Bugs Bunny",wiki:"Bugs Bunny",emoji:"🐰",cat:"Personaje Looney Tunes",hint:"¿Qué hay de nuevo, viejo?",age:85},
+{name:"SpongeBob SquarePants",wiki:"SpongeBob SquarePants",emoji:"🧽",cat:"Personaje Animado",hint:"Vive en una piña bajo el mar",age:26},
+{name:"Shrek",wiki:"Shrek (character)",emoji:"🧅",cat:"Personaje Animado",hint:"El ogro verde de los pantanos",age:25},
+{name:"Woody (Toy Story)",wiki:"Toy Story",emoji:"🤠",cat:"Personaje Animado",hint:"Hay una serpiente en mi bota",age:30},
+{name:"Elsa (Frozen)",wiki:"Elsa (Frozen)",emoji:"❄️",cat:"Personaje Disney",hint:"Let it Go, reina del hielo",age:12},
+{name:"Simba (El Rey León)",wiki:"The Lion King",emoji:"🦁",cat:"Personaje Disney",hint:"Hakuna Matata",age:31},
+{name:"Peter Griffin",wiki:"Peter Griffin",emoji:"🍺",cat:"Personaje Animado",hint:"Family Guy, padre caótico",age:42},
+{name:"Eric Cartman",wiki:"Eric Cartman",emoji:"😠",cat:"Personaje South Park",hint:"Respeta mi autoridad",age:10},
+{name:"Goku",wiki:"Goku",emoji:"🐉",cat:"Personaje Anime",hint:"Dragon Ball, el Saiyan más poderoso",age:48},
+{name:"Naruto Uzumaki",wiki:"Naruto Uzumaki",emoji:"🍜",cat:"Personaje Anime",hint:"Dattebayo, el Hokage de Konoha",age:33},
+{name:"Doraemon",wiki:"Doraemon",emoji:"🔵",cat:"Personaje Anime",hint:"El robot gato del futuro",age:114},
+{name:"Pikachu",wiki:"Pikachu",emoji:"⚡",cat:"Personaje Pokémon",hint:"Pika pika, el Pokémon eléctrico",age:29},
+{name:"Sonic the Hedgehog",wiki:"Sonic the Hedgehog",emoji:"💨",cat:"Personaje Videojuego",hint:"Gotta go fast, de SEGA",age:34},
+{name:"Mario Bros",wiki:"Mario (character)",emoji:"🍄",cat:"Personaje Nintendo",hint:"It's-a me, Mario!",age:43},
+{name:"Batman",wiki:"Batman",emoji:"🦇",cat:"Superhéroe DC",hint:"El Caballero Oscuro de Gotham",age:85},
+{name:"Spider-Man",wiki:"Spider-Man",emoji:"🕷️",cat:"Superhéroe Marvel",hint:"Con gran poder, gran responsabilidad",age:62},
+{name:"El Chapulín Colorado",wiki:"El Chapulín Colorado",emoji:"🦗",cat:"Personaje TV Mexicana",hint:"¡No contaban con mi astucia!",age:55},
+{name:"Chespirito",wiki:"Roberto Gómez Bolaños",emoji:"🔴",cat:"Actor / Comediante",hint:"El Chavo del 8, fallecido en 2014",age:85},
+{name:"El Chavo del 8",wiki:"El Chavo del 8",emoji:"🪣",cat:"Personaje TV",hint:"¡Fue sin querer queriendo!",age:8},
+{name:"Speedy González",wiki:"Speedy Gonzales",emoji:"🐭",cat:"Personaje Looney Tunes",hint:"¡Ándale ándale, arriba arriba!",age:70},
+{name:"Tom (Tom y Jerry)",wiki:"Tom and Jerry",emoji:"🐱",cat:"Personaje Animado",hint:"Siempre persiguiendo al ratón",age:85},
+{name:"Jerry (Tom y Jerry)",wiki:"Tom and Jerry",emoji:"🐭",cat:"Personaje Animado",hint:"El ratón siempre gana",age:85},
+{name:"Scooby-Doo",wiki:"Scooby-Doo",emoji:"🐕",cat:"Personaje Animado",hint:"¡Scooby Dooby Doo!",age:55},
+{name:"Bob Esponja",wiki:"SpongeBob SquarePants",emoji:"🧽",cat:"Personaje Animado",hint:"Cocinero en el Crustáceo Crujiente",age:26},
+{name:"Peppa Pig",wiki:"Peppa Pig",emoji:"🐷",cat:"Personaje Animado",hint:"Niña chancho británica",age:21},
+{name:"Pato Donald",wiki:"Donald Duck",emoji:"🦆",cat:"Personaje Disney",hint:"El personaje de Disney con más coraje",age:91},
+{name:"Winnie the Pooh",wiki:"Winnie-the-Pooh",emoji:"🍯",cat:"Personaje Animado",hint:"El osito amigo de Christopher Robin",age:100},
+// ── VARIADOS / RECIENTES ──
+{name:"Andrew Tate",wiki:"Andrew Tate",emoji:"🥊",cat:"Influencer / Ex boxeador",hint:"Muy viral y controversial en redes",age:38},
+{name:"Logan Paul",wiki:"Logan Paul",emoji:"🎬",cat:"YouTuber / Boxeador",hint:"YouTuber que se metió al boxeo",age:30},
+{name:"KSI",wiki:"KSI",emoji:"🎤",cat:"YouTuber / Boxeador",hint:"El YouTuber boxeador británico",age:32},
+{name:"Piqué",wiki:"Gerard Piqué",emoji:"⚽",cat:"Ex Futbolista",hint:"Ex del Barça, ex de Shakira",age:38},
+{name:"Fedez",wiki:"Fedez",emoji:"🎤",cat:"Rapero Italiano",hint:"Rapero italiano, ex de Chiara Ferragni",age:35},
+{name:"Noa Kirel",wiki:"Noa Kirel",emoji:"🇮🇱",cat:"Cantante / Actriz",hint:"Representó a Israel en Eurovision",age:23},
+{name:"Pabllo Vittar",wiki:"Pabllo Vittar",emoji:"💄",cat:"Cantante Drag / Pop",hint:"Drag queen y cantante brasileña",age:31},
+{name:"Anitta",wiki:"Anitta",emoji:"🇧🇷",cat:"Cantante Pop",hint:"Funkeira brasileña, Envolver viral",age:32},
+{name:"Lasso",wiki:"Lasso (singer)",emoji:"🎸",cat:"Cantante Pop Latino",hint:"Venezolano, Saturno",age:33},
+{name:"Wos",wiki:"Wos (rapper)",emoji:"🎤",cat:"Rapero Argentino",hint:"Freestyler y artista de culto arg.",age:26},
+{name:"Dillom",wiki:"Dillom",emoji:"🔥",cat:"Rapero Argentino",hint:"Post Mortem, hip hop oscuro arg.",age:24},
+{name:"Lit Killah",wiki:"Lit Killah",emoji:"🔫",cat:"Cantante Urbano",hint:"Argentino, colaboró con todos",age:23},
+{name:"Rusherking",wiki:"Rusherking",emoji:"❤️",cat:"Cantante Urbano",hint:"Argentino, ex de la China Suárez",age:25},
+{name:"Danna Paola",wiki:"Danna Paola",emoji:"🌙",cat:"Cantante / Actriz",hint:"Ex Elite, pop en español",age:29},
+{name:"Yuridia",wiki:"Yuridia",emoji:"🎤",cat:"Cantante Pop",hint:"Ex La Academia México",age:36},
+{name:"Ha-eun Jung",wiki:"IU (singer)",emoji:"🇰🇷",cat:"Cantante K-Pop (IU)",hint:"Idol, una de las más grandes de Corea",age:31},
+{name:"Jungkook (BTS)",wiki:"Jungkook",emoji:"🇰🇷",cat:"Cantante K-Pop / BTS",hint:"El Golden Maknae de BTS",age:27},
+{name:"Lisa (BLACKPINK)",wiki:"Lisa",emoji:"🇹🇭",cat:"Cantante K-Pop",hint:"LALISA, tailandesa de BLACKPINK",age:28},
+{name:"Jennie (BLACKPINK)",wiki:"Jennie (singer)",emoji:"🇰🇷",cat:"Cantante K-Pop",hint:"Solo, la IT girl de Corea",age:29},
+{name:"Zara (cantante)",wiki:"Zara (singer)",emoji:"🎤",cat:"Cantante Serbia",hint:"Representó a Serbia en Eurovision",age:22},
+{name:"Iga Świątek",wiki:"Iga Świątek",emoji:"🎾",cat:"Tenista",hint:"Número 1 del tenis femenino polaco",age:24},
+{name:"Coco Gauff",wiki:"Coco Gauff",emoji:"🎾",cat:"Tenista",hint:"Prodigio del tenis, ganó el US Open",age:21},
+{name:"Alexia Putellas",wiki:"Alexia Putellas",emoji:"⚽",cat:"Futbolista Femenina",hint:"Dos veces Balón de Oro femenino",age:31},
+{name:"Sam Kerr",wiki:"Sam Kerr",emoji:"⚽",cat:"Futbolista Femenina",hint:"Australiana, estrella del Chelsea",age:31},
+{name:"Lewis Hamilton",wiki:"Lewis Hamilton",emoji:"🏎️",cat:"Piloto F1",hint:"7 veces campeón del mundo F1",age:40},
+{name:"Nile Wilson",wiki:"Nile Wilson (gymnast)",emoji:"🤸",cat:"Gimnasta",hint:"Medallista olímpico británico",age:30},
+// ── MÁS MÚSICA ──
+{name:"Peso Pluma",wiki:"Peso Pluma",emoji:"🌵",cat:"Regional Mexicano",hint:"Hassan Emilio Kabande Laija",age:25},
+{name:"Grupo Frontera",wiki:"Grupo Frontera",emoji:"🎸",cat:"Banda Regional",hint:"Ven y hazme el amor, norteños virales",age:24},
+{name:"Ivan Cornejo",wiki:"Ivan Cornejo",emoji:"🎵",cat:"Cantante",hint:"Está dañado, indie mexicano",age:20},
+{name:"Eladio Carrión",wiki:"Eladio Carrión",emoji:"🐊",cat:"Cantante Urbano",hint:"Puerto Rico, Mon Laferte collab",age:28},
+{name:"Yng Lvcas",wiki:"Yng Lvcas",emoji:"🔱",cat:"Cantante Urbano",hint:"La bebe, viral en TikTok",age:25},
+{name:"Quevedo",wiki:"Quevedo (singer)",emoji:"🇪🇸",cat:"Cantante Urbano",hint:"Columbia, cantante español viral",age:22},
+{name:"Rel Campusano",wiki:"Rel Campusano",emoji:"🎤",cat:"Cantante Urbano",hint:"Dominicano, boom del drill latino",age:23},
+{name:"Mora",wiki:"Mora (singer)",emoji:"🔥",cat:"Cantante Urbano",hint:"Puerto Rico, Doble de riesgo",age:27},
+{name:"Villano Antillano",wiki:"Villano Antillano",emoji:"🦹",cat:"Cantante Urbana Trans",hint:"Boricua, pionera del trap trans latino",age:30},
+{name:"Mariah Angeliq",wiki:"Mariah Angeliq",emoji:"🦋",cat:"Cantante Urbana",hint:"Puerto Rico, La Jeepeta remix",age:28},
+{name:"Paloma Mami",wiki:"Paloma Mami",emoji:"🦋",cat:"Cantante Pop",hint:"Chileno-americana, No Te Enamores",age:25},
+{name:"Polimá Westcoast",wiki:"Polimá Westcoast",emoji:"🇨🇱",cat:"Cantante Urbano",hint:"Chileno, Ultrasolo con Paloma Mami",age:27},
+{name:"Young Miko",wiki:"Young Miko",emoji:"🎮",cat:"Cantante Urbana",hint:"Puertorriqueña, Bzrp Session 58",age:25},
+{name:"Dei V",wiki:"Dei V",emoji:"🌊",cat:"Cantante Urbano",hint:"Puerto Rico, Nobody collab Jhay",age:24},
+{name:"Sech",wiki:"Sech",emoji:"🎵",cat:"Cantante Urbano",hint:"Panamá, Otro Trago",age:29},
+{name:"Jhay Cortez",wiki:"Jhayco",emoji:"🌴",cat:"Cantante Urbano",hint:"PR, Sigan bailando, Dakiti",age:28},
+// ── MÁS ACTORES ──
+{name:"Zoe Saldana",wiki:"Zoe Saldana",emoji:"💙",cat:"Actriz",hint:"Gamora, Neytiri, Uhura",age:46},
+{name:"Lupita Nyong'o",wiki:"Lupita Nyong'o",emoji:"🌟",cat:"Actriz",hint:"12 Years a Slave, Black Panther",age:42},
+{name:"Idris Elba",wiki:"Idris Elba",emoji:"🦁",cat:"Actor",hint:"Luther, Stringer Bell en The Wire",age:52},
+{name:"John Boyega",wiki:"John Boyega",emoji:"⭐",cat:"Actor",hint:"Finn en Star Wars, británico",age:33},
+{name:"Letitia Wright",wiki:"Letitia Wright",emoji:"🦅",cat:"Actriz",hint:"Shuri en Black Panther",age:31},
+{name:"Josh O'Connor",wiki:"Josh O'Connor",emoji:"🎾",cat:"Actor",hint:"Challengers, The Crown",age:34},
+{name:"Mike Faist",wiki:"Mike Faist",emoji:"🎾",cat:"Actor",hint:"West Side Story, Challengers",age:32},
+{name:"Glen Powell",wiki:"Glen Powell",emoji:"🛩️",cat:"Actor",hint:"Top Gun Maverick, Cualquiera menos tú",age:36},
+// ── MÁS DEPORTISTAS ──
+{name:"Lamine Yamal",wiki:"Lamine Yamal",emoji:"⚽",cat:"Futbolista",hint:"El joven prodigio del Barcelona",age:17},
+{name:"Pedri",wiki:"Pedri",emoji:"⚽",cat:"Futbolista",hint:"Canario del Barcelona, Golden Boy",age:22},
+{name:"Gavi",wiki:"Gavi (footballer)",emoji:"⚽",cat:"Futbolista",hint:"Centrocampista del Barcelona",age:20},
+{name:"Jude Bellingham",wiki:"Jude Bellingham",emoji:"⚽",cat:"Futbolista",hint:"Inglés del Real Madrid",age:21},
+{name:"Bukayo Saka",wiki:"Bukayo Saka",emoji:"⚽",cat:"Futbolista",hint:"Arsenal y selección inglesa",age:23},
+{name:"Phil Foden",wiki:"Phil Foden",emoji:"⚽",cat:"Futbolista",hint:"El Genio de Stockport, City",age:25},
+{name:"Alexia Putellas",wiki:"Alexia Putellas",emoji:"⚽",cat:"Futbolista Femenina",hint:"Capitana Barça femenino, Balón de Oro",age:31},
+{name:"Aitana Bonmatí",wiki:"Aitana Bonmatí",emoji:"⚽",cat:"Futbolista Femenina",hint:"Balón de Oro 2023, Barcelona",age:26},
+{name:"Anthony Joshua",wiki:"Anthony Joshua",emoji:"🥊",cat:"Boxeador",hint:"Dos veces campeón mundial peso pesado",age:35},
+{name:"Tyson Fury",wiki:"Tyson Fury",emoji:"🥊",cat:"Boxeador",hint:"El Rey Gitano, invicto hasta 2024",age:36},
+{name:"Jon Jones",wiki:"Jon Jones",emoji:"🥋",cat:"Luchador MMA / UFC",hint:"Considerado el mejor de UFC",age:37},
+{name:"Israel Adesanya",wiki:"Israel Adesanya",emoji:"🥋",cat:"Luchador MMA / UFC",hint:"El último estilo-bender, nigeroaustraliano",age:35},
+{name:"Ngannou Francis",wiki:"Francis Ngannou",emoji:"🥊",cat:"Boxeador / Ex UFC",hint:"El depredador camerunés",age:38},
+{name:"Sha'Carri Richardson",wiki:"Sha'Carri Richardson",emoji:"⚡",cat:"Atleta",hint:"La velocista más vistosa de USA",age:25},
+{name:"Noah Lyles",wiki:"Noah Lyles",emoji:"🏃",cat:"Atleta",hint:"Campeón mundial 100m en 2024",age:28},
+];
+
+// ══════════════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════════════
+let gameMode='', players=[], aiPlayer=null;
+let currentPlayerIndex=0, currentRound=1, totalRounds=5;
+let globalUsed=new Set(), pozoRoundCelebs=[];
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function pickRandom(pool,n,exclude=new Set()){
+  const avail=pool.filter(c=>!exclude.has(c.name)).sort(()=>Math.random()-0.5);
+  return avail.slice(0,n);
+}
+function getAllPlayers(){ return gameMode==='ai'?[...players,aiPlayer]:players; }
+function log(msg){
+  const el=document.getElementById('game-log');
+  const p=document.createElement('p');p.innerHTML=msg;
+  el.appendChild(p);el.scrollTop=el.scrollHeight;
+}
+
+// ══════════════════════════════════════════════
+// PHOTO LOADING
+// ══════════════════════════════════════════════
+const photoCache={};
+async function loadPhoto(celeb){
+  const key=celeb.name;
+  if(photoCache[key]!==undefined) return photoCache[key];
+  try{
+    const title=celeb.wiki||celeb.name;
+    const url=`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=pageimages&format=json&pithumbsize=220&origin=*`;
+    const res=await fetch(url);
+    const data=await res.json();
+    const pages=data.query.pages;
+    const page=pages[Object.keys(pages)[0]];
+    const src=page?.thumbnail?.source||null;
+    photoCache[key]=src;
+    return src;
+  }catch(e){photoCache[key]=null;return null;}
+}
+
+async function setPhotoInEl(wrapId, celeb, cssClass){
+  const wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  wrap.innerHTML=`<span style="font-size:2rem">${celeb.emoji}</span>`;
+  const src=await loadPhoto(celeb);
+  if(src && document.getElementById(wrapId)){
+    if(cssClass==='wrap'){
+      wrap.innerHTML=`<img src="${src}" alt="${celeb.name}" style="width:100%;height:100%;object-fit:cover;object-position:top center;" onerror="this.parentNode.innerHTML='<span style=font-size:2rem>${celeb.emoji}</span>'">`;
+    }
+  }
+}
+
+async function buildPozoCard(celeb, idx){
+  const src=await loadPhoto(celeb);
+  const el=document.getElementById(`pcc-${idx}`);
+  if(!el) return;
+  const photoHtml=src
+    ?`<img class="pcc-photo" src="${src}" alt="${celeb.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="pcc-photo-placeholder" style="display:none">${celeb.emoji}</div>`
+    :`<div class="pcc-photo-placeholder">${celeb.emoji}</div>`;
+  el.querySelector('.pcc-photo-slot').innerHTML=photoHtml;
+}
+
+// ══════════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════════
+function selectMode(mode){
+  gameMode=mode;
+  document.getElementById('num-players-row').style.display=(mode==='multi')?'block':'none';
+  if(mode!=='multi') document.getElementById('num-players').value='1';
+  updatePlayerNames();
+  showScreen('screen-setup');
+}
+function updatePlayerNames(){
+  const cont=document.getElementById('player-names-container');
+  cont.innerHTML='';
+  const n=(gameMode==='multi')?parseInt(document.getElementById('num-players').value):1;
+  for(let i=0;i<n;i++){
+    cont.innerHTML+=`<div class="input-row"><label>Nombre del Jugador ${i+1}</label><input type="text" id="pname-${i}" placeholder="Jugador ${i+1}" value="Jugador ${i+1}"></div>`;
+  }
+}
+function startGame(){
+  totalRounds=parseInt(document.getElementById('num-rounds').value);
+  const n=(gameMode==='multi')?parseInt(document.getElementById('num-players').value):1;
+  players=[];
+  for(let i=0;i<n;i++){
+    const el=document.getElementById(`pname-${i}`);
+    players.push({name:el?(el.value.trim()||`Jugador ${i+1}`):`Jugador ${i+1}`,roundWins:0});
+  }
+  if(gameMode==='ai') aiPlayer={name:'🤖 Claude IA',roundWins:0};
+  currentRound=1; globalUsed=new Set();
+  startPozoPhase();
+}
+
+// ══════════════════════════════════════════════
+// FASE 1 — POZO
+// ══════════════════════════════════════════════
+function startPozoPhase(){
+  pozoRoundCelebs=pickRandom(CELEBRITIES,4,globalUsed);
+  pozoRoundCelebs.forEach(c=>globalUsed.add(c.name));
+
+  const allP=getAllPlayers();
+  allP.forEach(p=>{
+    p.pozoEstimate=0; p.pozoReal=pozoRoundCelebs.reduce((s,c)=>s+c.age,0);
+    p.hand=[]; p.total=0; p.standing=false;
+    p.usedCelebNames=new Set([...pozoRoundCelebs.map(c=>c.name)]);
+    p.gameEstimates=[]; // live estimates during play
+    p.estimatedTotal=0;
+    p.estimates=[];
+  });
+
+  document.getElementById('pz-round-cur').textContent=currentRound;
+  document.getElementById('pz-round-tot').textContent=totalRounds;
+
+  // Build pozo grid
+  const grid=document.getElementById('pozo-grid');
+  grid.innerHTML=pozoRoundCelebs.map((c,i)=>`
+    <div class="pozo-celeb-card" id="pcc-${i}">
+      <div class="pcc-photo-slot"><div class="pcc-photo-placeholder">${c.emoji}</div></div>
+      <div class="pcc-body">
+        <div class="pcc-name">${c.name}</div>
+        <div class="pcc-cat">${c.cat}</div>
+        <div class="pcc-hint">"${c.hint}"</div>
+      </div>
+    </div>`).join('');
+
+  // Load photos async
+  pozoRoundCelebs.forEach((c,i)=>buildPozoCard(c,i));
+
+  // Build estimate inputs
+  const cont=document.getElementById('estimates-container');
+  cont.innerHTML='';
+  allP.forEach((p,pi)=>{
+    const inputs=pozoRoundCelebs.map((c,ci)=>`
+      <div class="est-input-wrap">
+        <label>${c.emoji} ${c.name.split(' ')[0]}</label>
+        <input type="number" min="1" max="150" placeholder="?" id="est-${pi}-${ci}" oninput="updatePozoTotal(${pi})">
+      </div>`).join('');
+    cont.innerHTML+=`
+      <div class="player-estimate-row">
+        <div class="per-name">✏️ ${p.name}</div>
+        <div class="estimate-inputs">${inputs}</div>
+        <div class="pozo-total-row">
+          <span class="pozo-total-label">Pozo estimado:</span>
+          <span class="pozo-total-val" id="pozo-total-${pi}">—</span>
+        </div>
+      </div>`;
+  });
+
+  if(gameMode==='ai') aiEstimatePozo();
+  showScreen('screen-pozo');
+}
+
+function updatePozoTotal(pi){
+  let sum=0;
+  pozoRoundCelebs.forEach((_,ci)=>{
+    sum+=parseInt(document.getElementById(`est-${pi}-${ci}`)?.value)||0;
+  });
+  document.getElementById(`pozo-total-${pi}`).textContent=sum>0?sum:'—';
+}
+
+async function aiEstimatePozo(){
+  const aiIdx=players.length;
+  const prompt=`Estás jugando Celebrity Age Blackjack. Estimá las edades de estas 4 celebridades:
+${pozoRoundCelebs.map((c,i)=>`${i+1}. ${c.name} (${c.cat}) - "${c.hint}"`).join('\n')}
+Respondé SOLO con 4 números separados por coma. Ej: 32,45,28,67`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:40,messages:[{role:"user",content:prompt}]})
+    });
+    const data=await res.json();
+    const nums=data.content[0].text.match(/\d+/g)?.map(Number)||[];
+    pozoRoundCelebs.forEach((_,ci)=>{
+      const el=document.getElementById(`est-${aiIdx}-${ci}`);
+      if(el&&nums[ci]) el.value=nums[ci];
+    });
+    updatePozoTotal(aiIdx);
+  }catch(e){
+    const fb=[35,42,28,40];
+    pozoRoundCelebs.forEach((_,ci)=>{
+      const el=document.getElementById(`est-${aiIdx}-${ci}`);
+      if(el) el.value=fb[ci]||35;
+    });
+    updatePozoTotal(aiIdx);
+  }
+}
+
+function confirmPozo(){
+  const allP=getAllPlayers();
+  let allFilled=true;
+  allP.forEach((p,pi)=>{
+    let sum=0;
+    const ests=pozoRoundCelebs.map((_,ci)=>parseInt(document.getElementById(`est-${pi}-${ci}`)?.value)||0);
+    sum=ests.reduce((a,b)=>a+b,0);
+    if(sum===0){allFilled=false;return;}
+    p.pozoEstimate=sum;
+    p.estimates=ests;
+  });
+  if(!allFilled){alert('⚠️ Todos los jugadores deben completar sus estimaciones');return;}
+  startGamePhase();
+}
+
+// ══════════════════════════════════════════════
+// FASE 2 — PARTIDA
+// ══════════════════════════════════════════════
+function startGamePhase(){
+  currentPlayerIndex=0;
+  document.getElementById('gm-round-cur').textContent=currentRound;
+  document.getElementById('gm-round-tot').textContent=totalRounds;
+  document.getElementById('game-log').innerHTML='';
+  document.getElementById('cards-row').innerHTML='';
+  document.getElementById('age-reveal').classList.remove('visible');
+  document.getElementById('live-est-zone').style.display='none';
+  showScreen('screen-game');
+  log(`— Ronda ${currentRound} · Partida comenzó —`);
+  updateScoreboard();
+  loadPlayerTurn();
+}
+
+function loadPlayerTurn(){
+  const allP=getAllPlayers();
+  if(allP.every(p=>p.standing)){endRound();return;}
+  while(getAllPlayers()[currentPlayerIndex]?.standing){
+    currentPlayerIndex=(currentPlayerIndex+1)%allP.length;
+  }
+  const p=allP[currentPlayerIndex];
+  document.getElementById('turn-text').textContent=`Turno de: ${p.name}`;
+  // Reset display for this player's hand
+  renderPlayerHand(p);
+  drawCelebForPlayer(p);
+  updateStatusBar(p);
+  updateScoreboard();
+  const isAI=gameMode==='ai'&&currentPlayerIndex===players.length;
+  document.getElementById('action-zone').style.display=isAI?'none':'flex';
+  document.getElementById('ai-thinking').classList.remove('visible');
+  document.getElementById('live-est-zone').style.display=isAI?'none':'block';
+  if(isAI) setTimeout(aiTakeTurn,900);
+}
+
+function drawCelebForPlayer(p){
+  const pool=CELEBRITIES.filter(c=>!p.usedCelebNames.has(c.name)&&!globalUsed.has(c.name));
+  if(!pool.length){playerStand();return;}
+  const celeb=pool[Math.floor(Math.random()*pool.length)];
+  p.currentCeleb=celeb;
+
+  // Update card UI
+  document.getElementById('celeb-name').textContent=celeb.name;
+  document.getElementById('celeb-category').textContent=celeb.cat;
+  document.getElementById('celeb-hint').textContent=`"${celeb.hint}"`;
+  document.getElementById('age-reveal').classList.remove('visible');
+  document.getElementById('age-number').textContent=celeb.age;
+
+  // Photo
+  const wrap=document.getElementById('celeb-photo-wrap');
+  wrap.innerHTML=`<span style="font-size:2.4rem">${celeb.emoji}</span>`;
+  loadPhoto(celeb).then(src=>{
+    if(src && document.getElementById('celeb-name').textContent===celeb.name){
+      wrap.innerHTML=`<img src="${src}" alt="${celeb.name}" style="width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:50%;" onerror="this.parentNode.innerHTML='<span style=font-size:2.4rem>${celeb.emoji}</span>'">`;
+    }
+  });
+
+  // Reset live estimate input
+  const liveIn=document.getElementById('live-est-input');
+  liveIn.value='';
+  updateLiveRunning();
+}
+
+function updateLiveRunning(){
+  const p=getAllPlayers()[currentPlayerIndex];
+  if(!p) return;
+  const val=parseInt(document.getElementById('live-est-input')?.value)||0;
+  const running=p.estimatedTotal+val;
+  document.getElementById('live-est-running').innerHTML=`Suma estimada: <strong style="color:var(--gold)">${running}</strong> / <span style="color:var(--blue-light)">${p.pozoEstimate}</span>`;
+}
+
+function confirmEstimate(){
+  const p=getAllPlayers()[currentPlayerIndex];
+  const val=parseInt(document.getElementById('live-est-input').value)||0;
+  if(!val||val<1){alert('Ingresá una estimación antes de confirmar');return;}
+
+  const celeb=p.currentCeleb;
+  // Reveal age
+  document.getElementById('age-reveal').classList.add('visible');
+  document.getElementById('btn-hit').disabled=true;
+  document.getElementById('btn-stand').disabled=true;
+  document.getElementById('live-est-zone').style.display='none';
+
+  // Store estimate
+  p.gameEstimates.push({celeb, estimate:val, real:celeb.age});
+  p.estimatedTotal+=val;
+  p.hand.push(celeb);
+  p.usedCelebNames.add(celeb.name);
+  p.total+=celeb.age;
+
+  log(`<span class="log-gold">${p.name}</span> estimó <span class="log-blue">${val}</span> → real <strong>${celeb.age}</strong> | Acumulado: ${p.total} / Pozo: ${p.pozoEstimate}`);
+  renderPlayerHand(p);
+  updateStatusBar(p);
+
+  if(p.total>=p.pozoEstimate){
+    p.standing=true;
+    const bust=p.total>p.pozoEstimate;
+    log(bust?`💥 ¡${p.name} superó su Pozo!`:`✅ ¡${p.name} llegó exacto a su Pozo!`);
+    setTimeout(()=>advanceTurn(),1400);
+  } else {
+    setTimeout(()=>{
+      document.getElementById('btn-hit').disabled=false;
+      document.getElementById('btn-stand').disabled=false;
+      document.getElementById('live-est-zone').style.display='block';
+      drawCelebForPlayer(p);
+    },1200);
+  }
+}
+
+function playerHit(){
+  // Just triggers confirmEstimate flow — but first check if estimate is filled
+  const val=parseInt(document.getElementById('live-est-input').value)||0;
+  if(!val||val<1){
+    document.getElementById('live-est-input').focus();
+    document.getElementById('live-est-input').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('live-est-input').style.borderColor='',1000);
+    return;
+  }
+  confirmEstimate();
+}
+
+function playerStand(){
+  const p=getAllPlayers()[currentPlayerIndex];
+  p.standing=true;
+  log(`<span class="log-gold">${p.name}</span> se plantó con ${p.total} real / ${p.estimatedTotal} estimado (Pozo: ${p.pozoEstimate})`);
+  advanceTurn();
+}
+
+function advanceTurn(){
+  document.getElementById('btn-hit').disabled=false;
+  document.getElementById('btn-stand').disabled=false;
+  const allP=getAllPlayers();
+  if(allP.every(p=>p.standing)){endRound();return;}
+  let next=(currentPlayerIndex+1)%allP.length,loops=0;
+  while(allP[next].standing){next=(next+1)%allP.length;if(++loops>=allP.length){endRound();return;}}
+  currentPlayerIndex=next;
+  document.getElementById('cards-row').innerHTML='';
+  document.getElementById('age-reveal').classList.remove('visible');
+  log(`— Turno de ${allP[next].name} —`);
+  setTimeout(loadPlayerTurn,600);
+}
+
+// ══════════════════════════════════════════════
+// AI TURN
+// ══════════════════════════════════════════════
+async function aiTakeTurn(){
+  const p=aiPlayer;
+  document.getElementById('ai-thinking').classList.add('visible');
+  const celeb=p.currentCeleb;
+  const hand=p.hand.map(c=>`${c.name}(${c.age})`).join(', ');
+  const rem=p.pozoEstimate-p.total;
+  const prompt=`Jugás Celebrity Age Blackjack. Tu Pozo: ${p.pozoEstimate}. Acumulado real: ${p.total}. Restante: ${rem}.
+Cartas previas: [${hand||'ninguna'}]
+Próxima celebridad: ${celeb.name} (${celeb.cat}) - "${celeb.hint}"
+Primero estimá la edad (un número). Luego decidí HIT o STAND.
+Respondé SOLO así: "EST:32 HIT frase corta divertida" o "EST:45 STAND frase corta". Máximo 15 palabras.`;
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:80,messages:[{role:"user",content:prompt}]})
+    });
+    const data=await res.json();
+    const reply=data.content[0].text.trim();
+    const estMatch=reply.match(/EST:(\d+)/i);
+    const estimate=estMatch?parseInt(estMatch[1]):Math.round(celeb.age*(0.85+Math.random()*0.3));
+    const decision=reply.toUpperCase().includes('HIT')?'HIT':'STAND';
+    document.getElementById('ai-thinking').classList.remove('visible');
+    log(`🤖 Claude estima <span class="log-blue">${estimate}</span> años para ${celeb.name}: "${reply}"`);
+    setTimeout(()=>{ decision==='HIT'?aiHit(estimate):aiStand();},800);
+  }catch(e){
+    document.getElementById('ai-thinking').classList.remove('visible');
+    const est=Math.round(celeb.age*(0.85+Math.random()*0.3));
+    const wouldBust=(p.total+celeb.age)>p.pozoEstimate;
+    const rem2=p.pozoEstimate-p.total;
+    (!wouldBust&&rem2>12)?aiHit(est):aiStand();
+  }
+}
+
+function aiHit(estimate){
+  const p=aiPlayer;
+  document.getElementById('age-reveal').classList.add('visible');
+  const celeb=p.currentCeleb;
+  p.gameEstimates.push({celeb,estimate,real:celeb.age});
+  p.estimatedTotal+=estimate;
+  p.hand.push(celeb);
+  p.usedCelebNames.add(celeb.name);
+  p.total+=celeb.age;
+  log(`🤖 Claude tomó ${celeb.name} — real: ${celeb.age}. Total: ${p.total}/${p.pozoEstimate}`);
+  renderPlayerHand(p);
+  updateStatusBar(p);
+  if(p.total>=p.pozoEstimate){
+    p.standing=true;
+    log(p.total>p.pozoEstimate?`💥 Claude se pasó!`:`✅ Claude llegó exacto!`);
+    setTimeout(advanceTurn,1400);
+  } else {
+    setTimeout(()=>{drawCelebForPlayer(p);setTimeout(aiTakeTurn,900);},1300);
+  }
+}
+
+function aiStand(){
+  aiPlayer.standing=true;
+  log(`🤖 Claude se plantó con ${aiPlayer.total}/${aiPlayer.pozoEstimate}`);
+  advanceTurn();
+}
+
+// ══════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════
+function renderPlayerHand(p){
+  const row=document.getElementById('cards-row');
+  row.innerHTML='';
+  p.hand.forEach((c,i)=>{
+    const est=p.gameEstimates[i];
+    const bustCard=p.total>p.pozoEstimate&&i===p.hand.length-1;
+    const card=document.createElement('div');
+    card.className=`mini-card${bustCard?' bust':''}`;
+    card.id=`mc-${c.name.replace(/\s/g,'_')}`;
+    card.innerHTML=`<div class="mc-photo-placeholder" id="mc-ph-${i}">${c.emoji}</div><div class="mc-name">${c.name.split(' ')[0]}</div><span class="mc-age">${c.age}</span><div class="mc-est">est:${est?est.estimate:'?'}</div>`;
+    row.appendChild(card);
+    // Load photo async
+    loadPhoto(c).then(src=>{
+      if(src){
+        const ph=document.getElementById(`mc-ph-${i}`);
+        if(ph) ph.outerHTML=`<img class="mc-photo" src="${src}" alt="${c.name}" onerror="this.outerHTML='<div class=mc-photo-placeholder>${c.emoji}</div>'">`;
+      }
+    });
+  });
+}
+
+function updateStatusBar(p){
+  const totalEl=document.getElementById('total-display');
+  totalEl.textContent=p.total;
+  totalEl.className='stat-val';
+  const pct=p.pozoEstimate>0?p.total/p.pozoEstimate:0;
+  if(p.total>p.pozoEstimate) totalEl.classList.add('total-bust');
+  else if(pct>=0.9) totalEl.classList.add('total-danger');
+  else if(pct>=0.7) totalEl.classList.add('total-warn');
+  else totalEl.classList.add('total-safe');
+  document.getElementById('pozo-display').textContent=p.pozoEstimate||'—';
+  const fill=document.getElementById('progress-fill');
+  fill.style.width=Math.min(100,Math.round(pct*100))+'%';
+  fill.className='progress-fill';
+  if(p.total>p.pozoEstimate) fill.classList.add('bust');
+  else if(pct>=0.9) fill.classList.add('danger');
+  else if(pct>=0.7) fill.classList.add('warn');
+  updateLiveRunning();
+}
+
+function updateScoreboard(){
+  const allP=getAllPlayers();
+  const cur=allP[currentPlayerIndex];
+  document.getElementById('scoreboard').innerHTML=allP.map(p=>`
+    <div class="score-badge${p===cur?' active-player':''}">
+      <span class="score-name">${p.name}</span>
+      <span style="color:var(--cream);font-size:0.72rem">${p.roundWins}🏆</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// END ROUND
+// ══════════════════════════════════════════════
+function endRound(){
+  const allP=getAllPlayers();
+  const pozoRealTotal=pozoRoundCelebs.reduce((s,c)=>s+c.age,0);
+
+  allP.forEach(p=>{
+    p.bust=p.total>p.pozoEstimate;
+    p.pctOfPozo=(!p.bust&&p.pozoEstimate>0)?(p.total/p.pozoEstimate):0;
+  });
+  const valid=allP.filter(p=>!p.bust);
+  let roundWinner=null;
+  if(valid.length>0){
+    roundWinner=valid.reduce((best,p)=>p.pctOfPozo>best.pctOfPozo?p:best,valid[0]);
+    roundWinner.roundWins++;
+  }
+
+  // Pozo reveal
+  const pozoGrid=document.getElementById('pozo-reveal-grid');
+  pozoGrid.innerHTML=pozoRoundCelebs.map(c=>`
+    <div class="prg-card">
+      <div class="prg-photo-placeholder" id="prg-ph-${c.name.replace(/\s/g,'_')}">${c.emoji}</div>
+      <div class="prg-body"><div class="prg-name">${c.name}</div><div class="prg-real">${c.age}</div><div class="prg-real-label">años</div></div>
+    </div>`).join('');
+  pozoRoundCelebs.forEach(c=>{
+    loadPhoto(c).then(src=>{
+      if(src){
+        const el=document.getElementById(`prg-ph-${c.name.replace(/\s/g,'_')}`);
+        if(el) el.outerHTML=`<img class="prg-photo" src="${src}" alt="${c.name}" onerror="this.outerHTML='<div class=prc-photo-placeholder>${c.emoji}</div>'">`;
+      }
+    });
+  });
+  document.getElementById('pozo-real-total').textContent=pozoRealTotal;
+
+  // Player results
+  const sorted=[...allP].sort((a,b)=>{
+    if(a.bust&&!b.bust) return 1;
+    if(!a.bust&&b.bust) return -1;
+    return b.pctOfPozo-a.pctOfPozo;
+  });
+  const cont=document.getElementById('players-result-container');
+  cont.innerHTML='';
+  sorted.forEach((p,rank)=>{
+    const isWinner=p===roundWinner;
+    const estDiff=p.pozoEstimate-pozoRealTotal;
+    const estDiffLabel=estDiff===0?'¡Exacto!':estDiff>0?`+${estDiff} sobre el real`:`${estDiff} bajo el real`;
+    const pctLabel=p.bust?'💥 BUST':`${Math.round(p.pctOfPozo*100)}% del Pozo`;
+    const badgeClass=isWinner?'win':p.bust?'bust':'lose';
+    const badgeText=isWinner?'🏆 GANÓ':p.bust?'💥 BUST':`#${rank+1}`;
+
+    // Cards with estimates
+    let cardsHtml=p.hand.map((c,i)=>{
+      const est=p.gameEstimates[i];
+      const diff=est?(est.estimate-c.age):0;
+      const diffColor=Math.abs(diff)<=3?'#5CDB95':Math.abs(diff)<=7?'#F39C12':'var(--red-bright)';
+      return `<div class="prc-card">
+        <div class="prc-photo-placeholder" id="prcard-${p.name.replace(/\s/g,'_')}-${i}">${c.emoji}</div>
+        <div class="prc-body">
+          <div class="prc-name">${c.name.split(' ')[0]}</div>
+          <span class="prc-real">${c.age}</span>
+          <span class="prc-est" style="color:${diffColor}">est:${est?est.estimate:'?'} (${diff>=0?'+':''}${diff})</span>
+        </div>
+      </div>`;
+    }).join('');
+    if(!cardsHtml) cardsHtml=`<span style="opacity:0.4;font-size:0.73rem;font-style:italic">No tomó cartas</span>`;
+
+    // Est vs real comparison
+    const estReal=p.estimatedTotal;
+    const realTotal=p.total;
+    const diff2=estReal-realTotal;
+
+    cont.innerHTML+=`
+      <div class="player-result-block${isWinner?' winner':''}">
+        <div class="prb-header">
+          <span class="prb-name">${p.name}</span>
+          <span class="prb-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <div class="prb-compare-grid">
+          <div class="pcc-block">
+            <span class="pcc-label">Pozo Estimado</span>
+            <span class="pcc-val" style="color:var(--blue-light)">${p.pozoEstimate}</span>
+            <div class="pcc-diff" style="color:${Math.abs(estDiff)<=5?'#5CDB95':'#F39C12'}">${estDiffLabel}</div>
+          </div>
+          <div class="pcc-block">
+            <span class="pcc-label">Pozo Real</span>
+            <span class="pcc-val" style="color:var(--gold)">${pozoRealTotal}</span>
+          </div>
+          <div class="pcc-block">
+            <span class="pcc-label">Total Real</span>
+            <span class="pcc-val" style="color:${p.bust?'var(--red-bright)':p.pctOfPozo>0.9?'#5CDB95':'var(--cream)'}">${realTotal}</span>
+            <div class="pcc-diff" style="color:${p.bust?'var(--red-bright)':'#aaa'}">${pctLabel}</div>
+          </div>
+        </div>
+        <div class="est-vs-real-row">
+          <div class="evr-block">
+            <span class="evr-label">Suma Estimada en Partida</span>
+            <span class="evr-val" style="color:var(--blue-light)">${estReal}</span>
+          </div>
+          <div class="evr-block">
+            <span class="evr-label">Suma Real en Partida</span>
+            <span class="evr-val" style="color:var(--gold)">${realTotal}</span>
+          </div>
+          <div class="evr-block">
+            <span class="evr-label">Diferencia</span>
+            <span class="evr-val" style="color:${Math.abs(diff2)<=10?'#5CDB95':'#F39C12'}">${diff2>=0?'+':''}${diff2}</span>
+          </div>
+        </div>
+        <div class="prb-cards-section" style="margin-top:8px">
+          <div class="prb-cards-label">Cartas de la partida</div>
+          <div class="prb-cards-row" id="prb-cards-${p.name.replace(/\s/g,'_')}">${cardsHtml}</div>
+        </div>
+      </div>`;
+
+    // Load result card photos async
+    p.hand.forEach((c,i)=>{
+      loadPhoto(c).then(src=>{
+        if(src){
+          const el=document.getElementById(`prcard-${p.name.replace(/\s/g,'_')}-${i}`);
+          if(el) el.outerHTML=`<img class="prc-photo" src="${src}" alt="${c.name}" onerror="this.outerHTML='<div class=prc-photo-placeholder>${c.emoji}</div>'">`;
+        }
+      });
+    });
+  });
+
+  document.getElementById('result-trophy').textContent=roundWinner?'🏆':'💥';
+  document.getElementById('result-title').textContent=roundWinner?`¡Ganó ${roundWinner.name}!`:'Nadie sobrevivió';
+  document.getElementById('result-summary').textContent=roundWinner
+    ?`${roundWinner.name} llegó al ${Math.round(roundWinner.pctOfPozo*100)}% de su Pozo sin pasarse.`
+    :'Todos superaron su Pozo. Nadie suma puntos esta ronda.';
+  document.getElementById('btn-next-round').textContent=currentRound>=totalRounds?'Ver Resultado Final →':'Siguiente Ronda →';
+  showScreen('screen-result');
+}
+
+function nextRound(){
+  if(currentRound>=totalRounds){showFinalResult();return;}
+  currentRound++;
+  startPozoPhase();
+}
+
+function showFinalResult(){
+  const allP=getAllPlayers();
+  const sorted=[...allP].sort((a,b)=>b.roundWins-a.roundWins);
+  const champ=sorted[0];
+  document.getElementById('final-rank-list').innerHTML=sorted.map((p,i)=>`
+    <div class="final-rank-item${i===0?' champion':''}">
+      <span class="fri-name">${i===0?'🏆':i===1?'🥈':i===2?'🥉':'  '} ${p.name}</span>
+      <span class="fri-score">${p.roundWins} ronda${p.roundWins!==1?'s':''}</span>
+    </div>`).join('');
+  document.getElementById('final-title').textContent=`¡${champ.name} Campeón!`;
+  document.getElementById('final-summary').textContent=`Ganó ${champ.roundWins} de ${totalRounds} rondas con el mejor ojo para las edades.`;
+  showScreen('screen-final');
+}
+
+// INIT
+updatePlayerNames();
+</script>
+</body>
+</html>
