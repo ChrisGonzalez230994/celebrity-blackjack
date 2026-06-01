@@ -14,7 +14,7 @@
 
 <br/>
 
-[![Jugar Ahora](https://img.shields.io/badge/🎮%20JUGAR%20AHORA-FF6B6B?style=for-the-badge&logoColor=white)](https://celebrityblackjack.netlify.app)
+[![Jugar Ahora](https://chrisgonzalez230994.github.io/celebrity-blackjack/)
 
 ---
 
